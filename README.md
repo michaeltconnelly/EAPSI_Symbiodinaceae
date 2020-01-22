@@ -1,2 +1,2 @@
 # EAPSI_Symbiodinaceae
-Scripts for analysis Symbiodinaceae RNAseq 
+Scripts for analysis of Taiwan Pocillopora Symbiodinaceae RNAseq data
