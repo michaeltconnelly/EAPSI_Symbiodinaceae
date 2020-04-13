@@ -1,0 +1,31 @@
+---
+title: "Stable_DESeq-PCA_SymC1"
+author: "Mike Connelly"
+date: "10/24/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "~/computing/scripts/EAPSI.HW-WT-master/")
+```
+## Regularized-log transformation
+```{r, include=FALSE}
+      rld <- rlogTransformation(dds)
+```
+## PCA Plot
+ggplot2 PCA plot
+```{r, echo=FALSE}
+pdf(file = "./DEseqresults_SymC1/figures/PCA.pdf", width = 8, height = 8)
+PCAtmtdata <- plotPCA(rld, intgroup = c("Treatment"), returnData = TRUE)
+PCAtmtpercentVar <- round(100* attr(PCAtmtdata, "percentVar"))
+condcolors <- c("#00CCCC", "#FFCC33", "#CC0033", "#0000FF", "#FF6600", "#FF66FF")
+colshapes <- c(18, 9, 16, 10)
+PCA <- ggplot(PCAtmtdata, aes(PCAtmtdata$PC1, PCAtmtdata$PC2, color=stable_samples$Treatment, shape=stable_samples$Colony)) + geom_point(size=4, show.legend = TRUE) + xlab(paste0( "PC1: ", PCAtmtpercentVar[1], "% variance")) + ylab(paste0( "PC2: ", PCAtmtpercentVar[2], "% variance")) + coord_fixed() + ggtitle("Principal Component Analysis", subtitle = "Overall Symbiodinium transcriptome expression data")
+PCA + scale_color_manual(values=condcolors) + scale_shape_manual(values=colshapes)
+```
+```{r}
+
+```
+
+## Add additional principal coordinates axes, subset comparisons between closely grouped treatments
