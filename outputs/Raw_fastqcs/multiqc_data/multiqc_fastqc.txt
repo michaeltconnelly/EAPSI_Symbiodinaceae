@@ -1,0 +1,24 @@
+Sample	Filename	File type	Encoding	Total Sequences	Sequences flagged as poor quality	Sequence length	%GC	total_deduplicated_percentage	avg_sequence_length	basic_statistics	per_base_sequence_quality	per_tile_sequence_quality	per_sequence_quality_scores	per_base_sequence_content	per_sequence_gc_content	per_base_n_content	sequence_length_distribution	sequence_duplication_levels	overrepresented_sequences	adapter_content
+Hw1-4a	Hw1-4a.txt.gz	Conventional base calls	Sanger / Illumina 1.9	9878242.0	0.0	50.0	46.0	55.73884365626177	50.0	pass	pass	fail	pass	fail	pass	pass	pass	warn	warn	pass
+Hw1-4b	Hw1-4b.txt.gz	Conventional base calls	Sanger / Illumina 1.9	8240977.0	0.0	50.0	46.0	59.35523393580411	50.0	pass	pass	fail	pass	fail	fail	pass	pass	warn	fail	pass
+Hw1-4c	Hw1-4c.txt.gz	Conventional base calls	Sanger / Illumina 1.9	9008039.0	0.0	50.0	43.0	58.453209306116364	50.0	pass	pass	fail	pass	fail	pass	pass	pass	warn	warn	pass
+Hw1-6a	Hw1-6a.txt.gz	Conventional base calls	Sanger / Illumina 1.9	18833722.0	0.0	50.0	44.0	50.323714531498574	50.0	pass	pass	warn	pass	fail	pass	pass	pass	warn	pass	pass
+Hw1-6b	Hw1-6b.txt.gz	Conventional base calls	Sanger / Illumina 1.9	18562124.0	0.0	50.0	45.0	54.95720840505916	50.0	pass	pass	warn	pass	fail	pass	pass	pass	warn	warn	pass
+Hw1-6c	Hw1-6c.txt.gz	Conventional base calls	Sanger / Illumina 1.9	16512815.0	0.0	50.0	45.0	57.59847883029653	50.0	pass	pass	warn	pass	fail	pass	pass	pass	warn	pass	pass
+Hw2-4a	Hw2-4a.txt.gz	Conventional base calls	Sanger / Illumina 1.9	8980206.0	0.0	50.0	45.0	65.42355930279061	50.0	pass	pass	fail	pass	fail	warn	pass	pass	warn	warn	pass
+Hw2-4b	Hw2-4b.txt.gz	Conventional base calls	Sanger / Illumina 1.9	10511804.0	0.0	50.0	43.0	59.85612808145451	50.0	pass	pass	fail	pass	fail	pass	pass	pass	warn	warn	pass
+Hw2-4c	Hw2-4c.txt.gz	Conventional base calls	Sanger / Illumina 1.9	9776438.0	0.0	50.0	43.0	60.71512870407842	50.0	pass	pass	fail	pass	fail	fail	pass	pass	warn	fail	pass
+Hw2-6b	Hw2-6b.txt.gz	Conventional base calls	Sanger / Illumina 1.9	18646988.0	0.0	50.0	44.0	52.65328603568945	50.0	pass	pass	warn	pass	fail	pass	pass	pass	warn	pass	pass
+Hw2-6c	Hw2-6c.txt.gz	Conventional base calls	Sanger / Illumina 1.9	15441056.0	0.0	50.0	45.0	55.041359876260955	50.0	pass	pass	warn	pass	fail	pass	pass	pass	warn	warn	pass
+Wt1-4a	Wt1-4a.txt.gz	Conventional base calls	Sanger / Illumina 1.9	8813038.0	0.0	50.0	43.0	61.11400473537867	50.0	pass	pass	fail	pass	fail	pass	pass	pass	warn	pass	pass
+Wt1-4b	Wt1-4b.txt.gz	Conventional base calls	Sanger / Illumina 1.9	8605733.0	0.0	50.0	43.0	63.27165286582142	50.0	pass	pass	fail	pass	fail	pass	pass	pass	warn	fail	pass
+Wt1-4c	Wt1-4c.txt.gz	Conventional base calls	Sanger / Illumina 1.9	12363692.0	0.0	50.0	44.0	62.85722237541533	50.0	pass	pass	fail	pass	fail	pass	pass	pass	warn	pass	pass
+Wt1-6a	Wt1-6a.txt.gz	Conventional base calls	Sanger / Illumina 1.9	18493445.0	0.0	50.0	42.0	54.35188440671834	50.0	pass	pass	warn	pass	fail	pass	pass	pass	warn	pass	pass
+Wt1-6b	Wt1-6b.txt.gz	Conventional base calls	Sanger / Illumina 1.9	18437673.0	0.0	50.0	44.0	50.89063427644407	50.0	pass	pass	warn	pass	fail	fail	pass	pass	warn	fail	pass
+Wt1-6c	Wt1-6c.txt.gz	Conventional base calls	Sanger / Illumina 1.9	17822511.0	0.0	50.0	43.0	46.725853361836066	50.0	pass	pass	warn	pass	fail	pass	pass	pass	fail	pass	pass
+Wt2-4a	Wt2-4a.txt.gz	Conventional base calls	Sanger / Illumina 1.9	12318282.0	0.0	50.0	44.0	50.292870860476725	50.0	pass	pass	fail	pass	fail	pass	pass	pass	warn	warn	pass
+Wt2-4b	Wt2-4b.txt.gz	Conventional base calls	Sanger / Illumina 1.9	16357350.0	0.0	50.0	42.0	53.6725972840291	50.0	pass	pass	warn	pass	fail	pass	pass	pass	warn	pass	pass
+Wt2-4c	Wt2-4c.txt.gz	Conventional base calls	Sanger / Illumina 1.9	20366051.0	0.0	50.0	44.0	54.91087356133277	50.0	pass	pass	warn	pass	fail	pass	pass	pass	warn	pass	pass
+Wt2-6a	Wt2-6a.txt.gz	Conventional base calls	Sanger / Illumina 1.9	18020168.0	0.0	50.0	43.0	50.873410880217364	50.0	pass	pass	warn	pass	fail	pass	pass	pass	warn	warn	pass
+Wt2-6b	Wt2-6b.txt.gz	Conventional base calls	Sanger / Illumina 1.9	16780258.0	0.0	50.0	46.0	58.028842075217405	50.0	pass	pass	warn	pass	fail	pass	pass	pass	warn	pass	pass
+Wt2-6c	Wt2-6c.txt.gz	Conventional base calls	Sanger / Illumina 1.9	15668816.0	0.0	50.0	44.0	47.67553353812412	50.0	pass	pass	warn	pass	fail	pass	pass	pass	fail	warn	pass
