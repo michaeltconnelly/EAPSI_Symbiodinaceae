@@ -22,3 +22,7 @@ outputs/phylo/
 programs
 outputs/DESeqresults_SymC1 outputs/outputlist.txt
 outputs/DESeqresults_SymC1/
+data/indices/
+data/reads/
+data/GeoSymbio/
+outputs/
