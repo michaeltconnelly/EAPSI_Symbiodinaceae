@@ -40,7 +40,7 @@ echo salmon quant \
 -i ${prodir}/data/indices/symC1_MI_index \
 -l SR \
 -r ${prodir}/outputs/STARalign_Pdam/${EAPSIsample}_PdamUnmapped.out.mate1.fastq \
---validateMappings -o ./outputs/${EAPSIsample}transcripts_quant >> "${prodir}"/bash/jobs/"${EAPSIsample}"_salmonquant_symC1.job
+--validateMappings -o ${prodir}/outputs/${EAPSIsample}transcripts_quant >> "${prodir}"/bash/jobs/"${EAPSIsample}"_salmonquant_symC1.job
 
 #lets me know file is done
 echo 'echo' "Salmon quantification of $EAPSIsample complete"'' >> "${prodir}"/bash/jobs/"${EAPSIsample}"_salmonquant_symC1.job
