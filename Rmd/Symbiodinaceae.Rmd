@@ -1,0 +1,28 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Symbiodinaceae/")
+```
+## Setup packages and working directories
+```{r, message=FALSE}
+library("tidyverse")
+library("DESeq2")
+library("tximport")
+```
+## Import sample data
+```{r, echo=FALSE}
+samples <- read.table("./data/EAPSI_samples_AxH.txt", header = TRUE)
+#stable_samples$treatment <- as.factor(stable_samples$treatment)
+#stable_samples$genotype <- as.factor(stable_samples$genotype)
+```
+```{r}
+files <- file.path(dir, "salmon", samples$run, "quant.sf.gz")
+names(files) <- samples$run
+tx2gene <- read_csv(file.path(dir, "tx2gene.gencode.v27.csv"))
+```
+
+```{r}
+ddsTxi <- DESeqDataSetFromTximport(txi,
+                                   colData = samples,
+                                   design = ~ condition)
+```
+
