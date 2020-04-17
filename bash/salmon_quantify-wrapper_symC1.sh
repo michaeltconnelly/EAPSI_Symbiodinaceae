@@ -38,7 +38,7 @@ echo '#BSUB -W 4:00' >> "${prodir}"/bash/jobs/"${EAPSIsample}"_salmonquant_symC1
 echo "${mcs}"/programs/salmon-latest_linux_x86_64/bin/salmon quant \
 -i ${prodir}/data/indices/symC1_MI_index \
 -l SR \
--r ${prodir}/outputs/STARalign_Pdam/${EAPSIsample}_PdamUnmapped.out.mate1.fastq \
+-r ${prodir}/outputs/STARalign_Pdam/${EAPSIsample}_PdamUnmapped.out.mate1 \
 --validateMappings -o ${prodir}/outputs/${EAPSIsample}transcripts_quant >> "${prodir}"/bash/jobs/"${EAPSIsample}"_salmonquant_symC1.job
 
 #lets me know file is done
