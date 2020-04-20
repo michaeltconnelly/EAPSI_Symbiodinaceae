@@ -7,6 +7,7 @@ knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Symbiodinaceae/")
 library("tidyverse")
 library("DESeq2")
 library("tximport")
+library("readxl")
 ```
 ## Import sample data
 ```{r, echo=FALSE}
@@ -15,14 +16,69 @@ samples <- read.table("./data/EAPSI_samples_AxH.txt", header = TRUE)
 #stable_samples$genotype <- as.factor(stable_samples$genotype)
 ```
 ```{r}
-files <- file.path(dir, "salmon", samples$run, "quant.sf.gz")
-names(files) <- samples$run
-tx2gene <- read_csv(file.path(dir, "tx2gene.gencode.v27.csv"))
+trans_info <- read_excel(path = "./data/refs/GSE72763_Trinity_MI_min250nr_annotation_report.complete.5.xls")
+?read_excel
 ```
 
 ```{r}
-ddsTxi <- DESeqDataSetFromTximport(txi,
+dir <- "/Users/mikeconnelly/computing/projects/EAPSI_Symbiodinaceae/outputs/SymC1_transcripts_quant"
+###
+files <- file.path(dir, paste(samples$SampleID, "transcripts_quant", sep = ""), "quant.sf")
+names(files) <- samples$SampleID
+all(file.exists(files))
+###
+tx2gene <- read_csv(file.path("./data/tx2gene.csv"))
+```
+```{r}
+txi <- tximport(files, type="salmon", tx2gene = tx2gene)
+```
+
+```{r}
+dds <- DESeqDataSetFromTximport(txi,
                                    colData = samples,
-                                   design = ~ condition)
+                                   design = ~Batch + Colony + Treatment + Colony*Treatment)
+dds$Treatment <- factor(dds$Treatment, levels = c("control", "Antibiotics", "Heat", "Antibiotics.Heat"))
+relevel(dds$Treatment, ref = "control")
+```
+```{r}
+dds <- DESeq(dds)
+```
+```{r}
+keep <- rowSums(counts(dds), na.rm = TRUE) >= 10
+dds <- dds[keep,]
+```
+```{r}
+res <- results(dds)
+```
+## Check output of Overall DESeq2 analysis to ensure quality
+```{r}
+resultsNames(dds)
+```
+```{r}
+summary(res)
+```
+```{r}
+mcols(dds)
+```
+```{r}
+rownames(dds)
+```
+```{r}
+#res$IDGeneInfo <- mcols(dds)$IDGeneInfo
+#res$IDGeneInfo <- as.character(res$IDGeneInfo)
+```
+```{r}
+colnames(res)
+```
+```{r}
+plotDispEsts(dds)
+```
+```{r}
+plotMA(res, ylim = c(-20, 20))
+```
+
+```{r}
+res_heat_ctrl <- results(dds, contrast = c("Treatment", "Heat", "control"))
+summary(res_heat_ctrl)
 ```
 
