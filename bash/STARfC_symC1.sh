@@ -14,8 +14,8 @@ EAPSIsamples="Wt1-1a Wt1-1b Wt1-1c Wt1-4a Wt1-4b Wt1-4c Wt1-5a Wt1-5b Wt1-5c Wt1
 
 echo "These are the .bam files to be quantified using featureCounts"
 echo $EAPSIsamples
-${dcs}/programs/subread-1.6.0-Linux-x86_64/bin/featureCounts -t gene \
+${mcs}/programs/subread-1.6.0-Linux-x86_64/bin/featureCounts -t gene \
 -g ID \
--a ${dcs}/sequences/genomes/symbiodinium/symC1_genome.gff \
--o ${coldir}/${exp}/STARcounts_SymC1/${exp}_SymC1.counts \
-${coldir}/${exp}/STARalign_SymC1/*Aligned.out.bam
+-a ${mcs}/sequences/genomes/symbiodinium/symC1_genome.gff \
+-o ${prodir}/outputs/STARcounts_SymC1/${exp}_SymC1.counts \
+${prodir}/outputs/STARalign_SymC1/*Aligned.out.bam

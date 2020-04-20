@@ -5,7 +5,7 @@
 #BSUB -o STARwrap_symC1%J.out
 #BSUB -e STARwrap_symC1%J.err
 #BSUB -n 8
-#BSUB -u dxc947@miami.edu
+#BSUB -u m.connelly@umiami.edu
 
 #specify variable containing sequence file prefixes and directory paths
 mcs="/scratch/projects/transcriptomics/mikeconnelly"
