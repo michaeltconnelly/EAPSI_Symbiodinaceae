@@ -17,5 +17,5 @@ echo $EAPSIsamples
 ${mcs}/programs/subread-1.6.0-Linux-x86_64/bin/featureCounts -t gene \
 -g ID \
 -a ${mcs}/sequences/genomes/symbiodinium/symC1_genome.gff \
--o ${prodir}/outputs/STARcounts_SymC1/${exp}_SymC1.counts \
+-o ${prodir}/outputs/STARcounts_SymC1/AxH_SymC1.counts \
 ${prodir}/outputs/STARalign_SymC1/*Aligned.out.bam
