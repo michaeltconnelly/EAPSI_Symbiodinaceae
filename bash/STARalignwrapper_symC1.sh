@@ -34,7 +34,7 @@ echo ${mcs}/programs/STAR-2.5.3a/bin/Linux_x86_64/STAR \
 --runMode alignReads \
 --quantMode TranscriptomeSAM \
 --runThreadN 16 \
---readFilesIn ${prodir}/outputs/STARalign_Pdam/${EAPSIsample}_PdamUnmapped.out.mate1.fastq \
+--readFilesIn ${prodir}/outputs/STARalign_Pdam/${EAPSIsample}_PdamUnmapped.out.mate1 \
 --genomeDir ${mcs}/sequences/genomes/symbiodinium/STARindex \
 --sjdbGTFfeatureExon exon \
 --sjdbGTFtagExonParentTranscript Parent \
