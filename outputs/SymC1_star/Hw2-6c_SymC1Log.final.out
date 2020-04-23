@@ -1,12 +1,12 @@
-                                 Started job on |	Jul 18 10:16:20
-                             Started mapping on |	Jul 18 10:17:38
-                                    Finished on |	Jul 18 10:18:57
-       Mapping speed, Million of reads per hour |	263.63
+                                 Started job on |	Apr 23 07:39:11
+                             Started mapping on |	Apr 23 07:39:56
+                                    Finished on |	Apr 23 07:40:48
+       Mapping speed, Million of reads per hour |	400.50
 
-                          Number of input reads |	5785184
+                          Number of input reads |	5785011
                       Average input read length |	49
                                     UNIQUE READS:
-                   Uniquely mapped reads number |	4054826
+                   Uniquely mapped reads number |	4054822
                         Uniquely mapped reads % |	70.09%
                           Average mapped length |	48.70
                        Number of splices: Total |	1331070
@@ -21,7 +21,7 @@
                         Insertion rate per base |	0.00%
                        Insertion average length |	1.86
                              MULTI-MAPPING READS:
-        Number of reads mapped to multiple loci |	362013
+        Number of reads mapped to multiple loci |	362006
              % of reads mapped to multiple loci |	6.26%
         Number of reads mapped to too many loci |	2170
              % of reads mapped to too many loci |	0.04%
