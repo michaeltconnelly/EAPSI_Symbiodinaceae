@@ -10,6 +10,7 @@ View(mycounts)
 View(metadata)
 class(mycounts)
 class(metadata)
+t.test(mycounts[-1])
 metadata$SampleID
 names(mycounts)[-1]==metadata$SampleID
 all(names(mycounts)[-1]==metadata$SampleID)
@@ -44,14 +45,33 @@ View(sigproteins)
 sigproteincounts <- read_csv("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/AntiandHeatSigProteinsCounts.csv")
 View(sigproteincounts)
 
-# GENERATING HEAT MAP (All Unique DEGs)
+# Generating MA plot
+
+write_csv(labeledres, "~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/forMAmod.csv")
+MAdata <- read_csv("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/forMA.csv")
+View(MAdata)
+plotMA(MAdata)
+plotMA(MAdata, ylim=c(-6,6))
+
+# Generating PCA plot
+
+library(ggplot2)
+StableSamples <- dds
+rld <- rlogTransformation(StableSamples)
+PCAmtdata <- plotPCA(rld, intgroup = c("Treatment"), returnData = TRUE)
+PCAmtpercentVar <- round(100* attr(PCAmtdata, "percentVar"))
+condcolors <- c("#00CCCC", "#FFCC33", "#CC0033", "#0000FF", "#FF6600", "#FF66FF")
+colshapes <- c(18, 9, 16, 10)
+PCA <- ggplot(PCAmtdata, aes(PCAmtdata$PC1, PCAmtdata$PC2, color=StableSamples$Treatment, shape=StableSamples$Colony)) + geom_point(size=4, show.legend = TRUE) + xlab(paste0( "PC1: ", PCAmtpercentVar[1], "% variance")) + ylab(paste0( "PC2: ", PCAmtpercentVar[2], "% variance")) + coord_fixed() + ggtitle("Principal Component Analysis")
+PCA + scale_color_manual(values=condcolors) + scale_shape_manual(values=colshapes)
+
+# Generating heat maps
 
 library(grid)
 library(pairheatmap)
 library(pheatmap)
-help(pheatmap)
 
-### Control (All Genotypes) -> Not sure I actually need this if Log2FoldChange accounts for control!
+### Control (All Genotypes) 
 
 gncontrol <- read.table("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/GN_Control_Consolidate.txt", header=T)
 View(gncontrol)
@@ -89,7 +109,7 @@ heatmap(gnantiheatmatrix)
 
 ###### Filtered; E Value = 0
 
-### Control (All Genotypes) -> Not sure I actually need this if Log2FoldChange accounts for control!
+### Control (All Genotypes) 
 
 # Upregulated
 
@@ -170,23 +190,5 @@ downantiheatmatrix <- as.matrix(downantiheat[, -1])
 head(downantiheatmatrix)
 heatmap(downantiheatmatrix)
 
-######### Filtered; E Value = 0
 
-###### Anti x Heat
-
-# Hw1
-
-library(pheatmap)
-
-antiheathw1 <- read.table("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/Hw1_AntiHeat_20most.txt", header=T)
-View(antiheathw1[1:4])
-# DEG <- antiheathw1[5:6]
-# View(DEG)
-antiheathw1 <- antiheathw1[1:4]
-rownames(antiheathw1) <- antiheathw1$Gene
-antiheathw1matrix <- as.matrix(antiheathw1[, -1])
-pheatmap(antiheathw1matrix)
-# anno_colors <- list(DEG=c(Upregulated="red", Downregulated="blue"))
-# pheatmap(antiheathw1matrix, annotation_colors = anno_colors)
-# pheatmap(antiheathw1matrix)
 
