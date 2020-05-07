@@ -73,7 +73,7 @@ library(pheatmap)
 
 ### Control (All Genotypes) 
 
-gncontrol <- read.table("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/GN_Control_Consolidate.txt", header=T)
+gncontrol <- read.table("~/Desktop/Backups/Ellie_R_CSVs/GN_Control_Consolidate.txt", header=T)
 View(gncontrol)
 rownames(gncontrol) <- gncontrol$Gene
 gncontrolmatrix <- as.matrix(gncontrol[, -1])
@@ -190,5 +190,75 @@ downantiheatmatrix <- as.matrix(downantiheat[, -1])
 head(downantiheatmatrix)
 heatmap(downantiheatmatrix)
 
+# Reordering heat maps
+
+library(pheatmap)
+library(RColorBrewer)
+breaksList = seq(0:12)
+
+### Control
+
+controlcounts <- read.table("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/GN_Control_Consolidate.txt", header=T)
+controlmeta <- read.table("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/Control_Meta.txt", header=T)
+View(controlcounts)
+View(controlmeta)
+controlmeta$SampleID
+names(controlcounts)[-1]==controlmeta$SampleID
+all(names(controlcounts)[-1]==controlmeta$SampleID)
+controldds <- DESeqDataSetFromMatrix(countData = controlcounts[-1], colData = controlmeta, design = ~ Colony)
+controldds <- DESeq(controldds)
+class(controldds)
+controlselect <- order(rowMeans(counts(controldds,normalized=TRUE)),decreasing=TRUE)
+controldf <- as.data.frame(colData(controldds)[,c("Colony", "Treatment")])
+controlntd <- normTransform(controldds)
+pheatmap(assay(controlntd)[controlselect,], cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=controldf, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(length(breaksList)), breaks = breaksList)
+
+### Heat
+
+heatcounts <- read.table("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/GN_Heat_Consolidate_12.txt", header=T)
+heatmeta <- read.table("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/Heat_Meta.txt", header=T)
+View(heatcounts)
+View(heatmeta)
+heatmeta$SampleID
+names(heatcounts)[-1]==heatmeta$SampleID
+all(names(heatcounts)[-1]==heatmeta$SampleID)
+heatdds <- DESeqDataSetFromMatrix(countData = heatcounts[-1], colData = heatmeta, design = ~ Colony)
+heatdds <- DESeq(heatdds)
+heatselect <- order(rowMeans(counts(heatdds,normalized=TRUE)),decreasing=TRUE)
+heatdf <- as.data.frame(colData(heatdds)[,c("Colony", "Treatment")])
+heatntd <- normTransform(heatdds)
+pheatmap(assay(heatntd)[heatselect,], cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=heatdf, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(length(breaksList)), breaks = breaksList)
+
+### Anti
+
+anticounts <- read.table("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/GN_Anti_Consolidate_12.txt", header=T)
+antimeta <- read.table("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/Anti_Meta.txt", header=T)
+View(anticounts)
+View(antimeta)
+antimeta$SampleID
+names(anticounts)[-1]==antimeta$SampleID
+all(names(anticounts)[-1]==antimeta$SampleID)
+antidds <- DESeqDataSetFromMatrix(countData = anticounts[-1], colData = antimeta, design = ~ Colony)
+antidds <- DESeq(antidds)
+antiselect <- order(rowMeans(counts(antidds,normalized=TRUE)),decreasing=TRUE)
+antidf <- as.data.frame(colData(antidds)[,c("Colony", "Treatment")])
+antintd <- normTransform(antidds)
+pheatmap(assay(antintd)[antiselect,], cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=antidf, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(length(breaksList)), breaks = breaksList)
+
+### Heat x Anti
+
+heatanticounts <- read.table("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/GN_AntiHeat_Consolidate_12.txt", header=T)
+heatantimeta <- read.table("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/AntiHeat_Meta.txt", header=T)
+View(heatanticounts)
+View(heatantimeta)
+heatantimeta$SampleID
+names(heatanticounts[-1])==heatantimeta$SampleID
+all(names(heatanticounts)[-1]==heatantimeta$SampleID)
+heatantidds <- DESeqDataSetFromMatrix(countData = heatanticounts[-1], colData = heatantimeta, design = ~ Colony)
+heatantidds <- DESeq(heatantidds)
+heatantiselect <- order(rowMeans(counts(heatantidds,normalized=TRUE)),decreasing=TRUE)
+heatantidf <- as.data.frame(colData(heatantidds)[,c("Colony", "Treatment")])
+heatantintd <- normTransform(heatantidds)
+pheatmap(assay(heatantintd)[heatantiselect,], cluster_rows=FALSE, show_rownames=FALSE, cluster_cols=FALSE, annotation_col=heatantidf, color = colorRampPalette(rev(brewer.pal(n = 7, name = "RdYlBu")))(length(breaksList)), breaks = breaksList)
 
 
