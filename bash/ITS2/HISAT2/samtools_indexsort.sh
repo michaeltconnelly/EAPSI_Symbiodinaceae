@@ -6,3 +6,6 @@ samtools view -bS ./outputs/HISAT2align_ITS2/${EAPSIsample}_HISAT2_ITS2.sam > ${
 samtools sort ${EAPSIsample}_HISAT2_ITS2.bam -o ./outputs/HISAT2align_ITS2/${EAPSIsample}_HISAT2_ITS2.sorted.bam
 samtools index -b ./outputs/HISAT2align_ITS2/${EAPSIsample}_HISAT2_ITS2.sorted.bam ./outputs/HISAT2align_ITS2/${EAPSIsample}_HISAT2_ITS2.sorted.bai
 done
+
+
+samtools view -F 4 in.sam > mapped.sam

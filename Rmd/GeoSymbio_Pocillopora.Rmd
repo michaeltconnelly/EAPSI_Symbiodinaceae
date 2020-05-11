@@ -1,0 +1,33 @@
+---
+title: "GeoSymbio"
+author: "Mike Connelly"
+date: "5/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Users/mikeconnelly/computing/projects/EAPSI_Symbiodinaceae")
+```
+```{r}
+library("tidyverse")
+```
+
+```{r}
+geosymbio <- read.csv("./data/symtypes/GeoSymbio_DATA.csv")
+```
+```{r}
+psym <- geosymbio %>%
+  filter(Host_Genus == "Pocillopora") %>%
+  select(Clade, Type, Gene, Genbank, Host_Sci_Name, Country, StateRegion, SubRegion, Latitude, Longitude, Ref, Species, Redundancy)
+psym_refs <- psym %>% 
+  filter(!grepl("same_as_", Genbank)) %>%
+  filter(!grepl("N_A", Genbank)) %>%
+  filter(!grepl("N_A", Type)) %>%
+  distinct(Type, .keep_all = TRUE) %>%
+  arrange(Type)
+```
+```{r}
+write_csv(psym_refs, path = "./data/symtypes/GeoSymbio_Pocillopora.csv")
+```
+
