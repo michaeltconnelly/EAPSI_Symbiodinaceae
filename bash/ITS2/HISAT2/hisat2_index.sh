@@ -12,5 +12,5 @@
 
 /Users/mikeconnelly/computing/programs/hisat2-2.1.0/hisat2-build  \
  -f \
-./data/symtypes/symrefs.fasta \
-./data/indices/HISAT2/symrefs
+./data/symtypes/symrefs_its2_cd.fasta \
+./data/indices/HISAT2/symrefs_its2_cd
