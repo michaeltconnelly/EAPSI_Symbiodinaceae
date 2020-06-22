@@ -6,11 +6,18 @@ library("phyloseq"); packageVersion("phyloseq")
 library("ggplot2"); packageVersion("ggplot2")
 library("plyr"); packageVersion("plyr")
 library("ComplexHeatmap")
+library(tidyverse)
+library(DESeq2)
+library(geneplotter)
+library(ggplot2)
+library(grid)
+library(pairheatmap)
+library(pheatmap)
 
 # Denoting res ---------------------------------------------------------------------------------------------
 
-mycounts <- read_csv("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/AntiandHeatCountsNew.csv")
-metadata <- read_csv("~/Desktop/EAPSI_Symbiodinaceae/Ellie_R_CSVs/AntiandHeatMeta.csv")
+mycounts <- read_csv("~/Desktop/EAPSI_Symbiodinaceae/outputs/DESeq-results/AntiandHeatCountsNew.csv")
+metadata <- read_csv("~/Desktop/EAPSI_Symbiodinaceae/outputs/DESeq-results/AntiandHeatMeta.csv")
 View(mycounts)
 View(metadata)
 class(mycounts)
@@ -138,11 +145,11 @@ volcanoplot(res) # DEGcolors not defined...what scale color manual to use?
 # First, press command-D on mac or ctrl-shift-H in Rstudio and navigate to the directory containing scripts and input files. Then edit, mark and execute the following bits of code, one after another.
 
 # Edit these to match your data file names: 
-input="heats.csv" # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
-goAnnotations="amil_defog_iso2go.tab" # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon. If you have multiple lines per gene, use nrify_GOtable.pl prior to running this script.
+input=read_csv("~/Desktop/GO.csv") # two columns of comma-separated values: gene id, continuous measure of significance. To perform standard GO enrichment analysis based on Fisher's exact test, use binary measure (0 or 1, i.e., either sgnificant or not).
+goAnnotations=read_csv("~/Desktop/trial.txt") # two-column, tab-delimited, one line per gene, multiple GO terms separated by semicolon. If you have multiple lines per gene, use nrify_GOtable.pl prior to running this script.
 goDatabase="go.obo" # download from http://www.geneontology.org/GO.downloads.ontology.shtml
 goDivision="MF" # either MF, or BP, or CC
-source("gomwu.functions.R")
+source("~/Desktop/gomwu.functions.R")
 
 
 # Calculating stats. It might take ~3 min for MF and BP. Do not rerun it if you just want to replot the data with different cutoffs, go straight to gomwuPlot. If you change any of the numeric values below, delete the files that were generated in previos runs first.
