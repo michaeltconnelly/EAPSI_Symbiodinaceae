@@ -8,12 +8,14 @@ output:
 ---
 
 ```{r setup, include=FALSE}
+#WORKS
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
 knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Symbiodinaceae/")
 ```
 ## Setup packages and working directories
 Include all packages needed for the entire DESeq2 analysis and downstream visualizations
 ```{r packages, message=FALSE, include=FALSE}
+#WORKS
 library("tidyverse")
 library("DESeq2")
 library("apeglm")
@@ -52,10 +54,11 @@ colshapes_null <- c(rep(20, 8))
 ```
 ## Import sample metadata and counts data
 ```{r, echo=TRUE}
+#WORKS
 stable_samples <- read.table("../data/EAPSI_samples_AxH.txt", header = TRUE)
 #stable_samples$treatment <- as.factor(stable_samples$treatment)
 #stable_samples$genotype <- as.factor(stable_samples$genotype)
-countdata <- read.delim("../outputs/SymC1_counts/AxH_SymC1.counts", comment.char="#")
+countdata <- read.delim("~/Downloads/AxH_SymC1.counts", comment.char="#")
 ## Tidy counts data
 #Set Gene ID's as row names
 row.names(countdata) <- countdata$Geneid
@@ -71,10 +74,17 @@ countdata.sorted <- as.data.frame(countdata[order(rownames(countdata)),])
 ```
 ## Import gene annotation information
 ```{r gene data}
-gene_annotation <- read.delim(file = "../data/genome/SymbC1.Gene_Models.Annotation.tab", header = T)
+# MISSING GENE ANNOTATION STUFF
+#gene_annotation <- read_csv("~/Downloads/SymbC1.Gene_Models.Annotation.csv")
+write.table(read.csv('~/Downloads/SymbC1.Gene_Models.Annotation.csv'), '~/Downloads/SymbC1.Gene_Models.Annotation.tab')
+gene_annotation <- read.table(file = "~/Downloads/SymbC1.Gene_Models.Annotation.tab")
+View(gene_annotation$ID)
+View(rownames(countdata.sorted))
 names(gene_annotation) <- gencols <- c("ID", "UniProt_Hit", "GeneInfo", "e_value", "GO_Terms", "KO_Terms", "Pfam_Domains")
+#View(gene_annotation$ID)
 rownames(gene_annotation) <- gene_annotation$ID
 # Check gene feature annotation and countdata rowname order coherence
+#-------------DON'T MATCH UP------------------
 all(rownames(countdata.sorted) == gene_annotation$ID)
 all(rownames(countdata.sorted) ==  rownames(gene_annotation))
 # Obtain KOG annotations for C. goreaui genome
@@ -96,6 +106,7 @@ colcounts <- countdata.sorted %>%
 
 ## Create DESeqDataSet
 ```{r create_dds}
+# WORKS
 # Create full DESeqDataSet
 dds <- DESeqDataSetFromMatrix(countData = countdata.sorted,
                               colData = coldata,
@@ -111,6 +122,7 @@ dds <- dds[ rowSums(counts(dds)) > 10, ]
 ```
 ## Visualize global gene expression
 ```{r vst}
+# WORKS
 # Normalize expression data for visualization purposes using VST tranformation
 vsd <- vst(dds, blind = TRUE)
 ```
@@ -119,6 +131,7 @@ ggPCA(vsd, samples, condcolors_AxH, pclab = c(1,2))
 ```
 ### Principal Coordinate Analysis (PCoA)
 ```{r mds, eval = TRUE}
+# WORKS
 ## Calculate distances among samples
 sampleDists <- dist(t(assay(vsd)), method = "manhattan")
 sampleDistMatrix <- as.matrix(sampleDists)
@@ -128,6 +141,7 @@ mds <- as.data.frame(colData(vsd)) %>%
   cbind(cmdscale(sampleDistMatrix))
 ```
 ```{r colony pcoa}
+# WORKS
 # Calculate Colony centroids for plotting
 mds_col <- mds %>%
   group_by(Colony) %>%
@@ -155,10 +169,11 @@ pcoa1 <- ggplot(mds_col, aes(fill = Treatment)) +
 pcoa1title <- expression(paste("PCoA of overall ", italic("Cladocopium"), " spp. gene expression"))
 pcoa1 <- pcoa1 + ggtitle(pcoa1title, subtitle = "Plotted with colony centroids")
 pcoa1
-ggsave(pcoa1, filename = "./outputs/DESeq-results/figures/pcoa_colony_SymC1.png", width = 6, height = 4, units = "in")
-ggsave(pcoa1, filename = "./manuscript_figures/FigS3_PCoA_Colony_SymC1.png", width = 6, height = 4, units = "in")
+ggsave(pcoa1, filename = "~/Desktop/pcoa_colony_SymC1.png", width = 6, height = 4, units = "in")
+ggsave(pcoa1, filename = "~/Desktop/FigS3_PCoA_Colony_SymC1.png", width = 6, height = 4, units = "in")
 ```
 ```{r treatment pcoa}
+# WORKS
 # Calculate Treatment centroids for plotting
 mds_trmt <- mds %>%
   group_by(Treatment) %>%
@@ -189,13 +204,14 @@ pcoa2 <-ggplot(mds_trmt, aes(fill = Treatment)) +
 pcoa2title <- expression(paste("PCoA of overall ", italic("Cladocopium"), " spp. gene expression"))
 pcoa2 <- pcoa2 + ggtitle(pcoa2title, subtitle = "Plotted with treatment centroids")
 pcoa2
-ggsave(pcoa2, filename = "./outputs/DESeq-results/figures/pcoa_treatment_SymC1.png", width = 6, height = 4, units = "in")
-ggsave(pcoa2, filename = "./manuscript_figures/FigS4_PCoA_Treatment_SymC1.png", width = 6, height = 4, units = "in")
+ggsave(pcoa2, filename = "~/Desktop/pcoa_treatment_SymC1.png", width = 6, height = 4, units = "in")
+ggsave(pcoa2, filename = "~/Desktop/FigS4_PCoA_Treatment_SymC1.png", width = 6, height = 4, units = "in")
 ```
 
 ### Variance partitioning
 Partition total transcriptome variance among explanatory factors including sequencing batch, colony/genotype, treatment, and their interaction.
 ```{r varpart_total}
+# WORKS
 varformula <- ~ (1|Batch) + (1|Colony) + (1|Treatment) + (1|Treatment:Colony)
 varpart_total <- fitExtractVarPartModel(assay(vsd), varformula, coldata)
 # sort variables (i.e. columns) by median fraction of variance explained
@@ -204,19 +220,20 @@ vpt <- sortCols(varpart_total)
 varplot <- plotVarPart(vpt, col = varcolors)
 vartitle <- expression(paste(italic("Cladocopium"), " spp. transcriptome variance partition"))
 varplot <- varplot + ggtitle(vartitle)
-ggsave(varplot, filename = "./manuscript_figures/FigS5_variancePartition_total.png", height = 4, width = 5, units = "in", device = "png")
+ggsave(varplot, filename = "~/Desktop/FigS5_variancePartition_total.png", height = 4, width = 5, units = "in", device = "png")
 ```
 Partition transcriptome variance among explanatory factors within each colony/genotype
 ```{r varpart_col, eval = TRUE, results = 'hide'}
 # Join count data with sample data, and nest vs count data by colony
 rm(all)
-all <- left_join(coldata, colcounts) 
-all <- all %>% 
-  group_by(Colony) %>%
-  nest()
+all <- left_join(coldata, colcounts)
+View(all)
+all <- all %>% group_by(Colony) 
+# %>% nest()
+View(all)
 
 # Create DESeqDataSet for each colony, filter genes mean count > 1 within each colony, and vst transform
-all <- all %>%
+all <- all %>% 
   mutate(sdat = map(.x = data, ~ data.frame(column_to_rownames(distinct(., SampleID, Treatment, Batch, group), "SampleID"))),
          counts = map(.x = data, ~ spread(select(., SampleID, gene, count), SampleID, count)),
          counts = map(.x = counts, ~ as.matrix(column_to_rownames(., "gene"))),
@@ -376,7 +393,7 @@ yplot
 
 dapcplot <- plot_grid(xplot, NULL, dapc.fig, ncol = 1, align = "hv", rel_heights = c(0.7, -0.28, 2))
 dapcplot
-ggsave(filename = "./manuscript_figures/FigS7_DAPC.png", plot = dapcplot, width = 5, height = 5, units = "in")
+ggsave(filename = "~/Desktop/FigS7_DAPC.png", plot = dapcplot, width = 5, height = 5, units = "in")
 ```
 The DAPC shows...
 
