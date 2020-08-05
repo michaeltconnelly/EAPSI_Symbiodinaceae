@@ -29,7 +29,7 @@ library("dynamicTreeCut")
 library("flashClust")
 #GO/KOG enrichment packages
 library("KOGMWU")
-source("/Users/cecilymartin/Desktop/EAPSI_Symbiodinaceae/R/GO_MWU/gomwu.functions.R")
+source("../R/GO_MWU/gomwu.functions.R")
 source("../R/AXH_functions.R")
 #data visualization packages
 library("pheatmap")
@@ -136,34 +136,38 @@ theme_set(theme_mec())
 samples <- read.table("../data/EAPSI_samples_AxH.txt", header = TRUE)
 samples$SampleID <- gsub('-','.', samples$SampleID)
 # Import and tidy counts data
-countdata <- read.csv("~/Desktop/AxH_SymC1.csv")
+countdata <- read.csv("../outputs/AxH_SymC1.csv")
+row.names(countdata) <- countdata$Geneid
+countdata <- countdata[ ,7:ncol(countdata)]
+countdata.sorted <- as.data.frame(countdata[order(rownames(countdata)),])
+#View(countdata)
 # Merge Geneid column and counts columns, cutting out middle columns
-countcols <- (countdata[ ,7:ncol(countdata)])
-idcol <- (countdata[1])
-combinedcols <- data.frame(idcol, countcols)
+#countcols <- (countdata[ ,7:ncol(countdata)])
+#idcol <- (countdata[1])
+#combinedcols <- data.frame(idcol, countcols)
 # Clip counts data so same number of rows as annotation data (there are more counts Geneid's than annotation ID's)
-clipcounts <- merge(combinedcols, gene_annotation, by.x = "Geneid", by.y = "ID", all.x = FALSE, all.y = TRUE)
+#clipcounts <- merge(combinedcols, gene_annotation, by.x = "Geneid", by.y = "ID", all.x = FALSE, all.y = TRUE)
 # Showing unmatched counts genes
-preclipcounts <- merge(combinedcols, gene_annotation, by.x = "Geneid", by.y = "ID", all.x = TRUE)
-sum(is.na(preclipcounts$Description))
+#preclipcounts <- merge(combinedcols, gene_annotation, by.x = "Geneid", by.y = "ID", all.x = TRUE)
+#sum(is.na(preclipcounts$Description))
 #Adding missing IDs to dataframe
-Missing = NULL
-for(i in 1:length(preclipcounts$Description)) { 
-  if(is.na(preclipcounts$Description[i])) {
-    print(preclipcounts$Geneid[i])
-    Identifiers = preclipcounts$Geneid[i]
-    Missing = rbind(Missing, data.frame(Identifiers))
-  }
-}
-write.csv(Missing, "~/Desktop/EAPSI_Pocillopora_AxH//Missing.csv")
+#Missing = NULL
+#for(i in 1:length(preclipcounts$Description)) { 
+  #if(is.na(preclipcounts$Description[i])) {
+    #print(preclipcounts$Geneid[i])
+    #Identifiers = preclipcounts$Geneid[i]
+    #Missing = rbind(Missing, data.frame(Identifiers))
+  #}
+#}
+#write.csv(Missing, "~/Desktop/EAPSI_Pocillopora_AxH/Missing.csv")
 
 # Remove UniProt and Description columns
-clipcounts <- clipcounts[1:48]
+#clipcounts <- clipcounts[1:48]
 # Set Gene ID's as row names
-row.names(clipcounts) <- clipcounts$Geneid
+#row.names(clipcounts) <- clipcounts$Geneid
 # Sort countdata by P. damicornis gene ID
-countdata.sorted <- as.data.frame(clipcounts[order(rownames(clipcounts)),])
-countdata.sorted <- countdata.sorted[-1]
+#countdata.sorted <- as.data.frame(clipcounts[order(rownames(clipcounts)),])
+#countdata.sorted <- countdata.sorted[-1]
 
 # Mike's original data...
 # Set Gene ID's as row names
@@ -178,11 +182,14 @@ countdata.sorted <- countdata.sorted[-1]
 ```{r gene data}
 #gene_annotation <- read.delim(file = "./data/genome_annotations.tab", header = T) %>% arrange(ID)
 
-gene_annotation <- read.csv("~/Desktop/SymbC1.Gene_Models.Annotation.csv")
-rownames(gene_annotation) <- gene_annotation$ID
+#gene_annotation <- read.csv("~/Desktop/SymbC1.Gene_Models.Annotation.csv")
+gene_annotation <- read.csv("../resources/SymbC1.Gene_Models.Annotation.csv")
+rownames(gene_annotation) <- gene_annotation$Gene.model
+gene_annotation <- as.data.frame(gene_annotation[order(rownames(gene_annotation)),])
+
 
 # Check gene feature annotation and countdata rowname order coherence
-all(rownames(countdata.sorted) == gene_annotation$ID)
+all(rownames(countdata.sorted) == gene_annotation$Gene.model)
 all(rownames(countdata.sorted) ==  rownames(gene_annotation))
 
 # Obtain KOG annotations for P. damicornis genome
@@ -384,8 +391,8 @@ DE
 ```
 ```{r DEG table}
 DE <- DE %>%
-  mutate(df = map(dsr, ~ rownames_to_column(data.frame(.), "ID")),
-         df = map(df, ~ left_join(., gene_annotation, by = "ID")))
+  mutate(df = map(dsr, ~ rownames_to_column(data.frame(.), "Gene.model")),
+         df = map(df, ~ left_join(., gene_annotation, by = "Gene.model")))
 # Filter out significant up and down-regulated genes
 DE <- DE %>%
   mutate(sig = map(df, ~ filter(., padj < 0.05)),
