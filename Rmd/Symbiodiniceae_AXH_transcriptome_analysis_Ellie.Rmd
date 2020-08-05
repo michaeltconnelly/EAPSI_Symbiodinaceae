@@ -9,7 +9,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
-knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Pocillopora_AxH/")
+knitr::opts_knit$set(root.dir = "~/Documents/Research/EAPSI_Symbiodinaceae/Rmd")
 options(stringsAsFactors = FALSE)
 ```
 ## (DONE) Setup packages and working directories
@@ -193,7 +193,7 @@ all(rownames(countdata.sorted) == gene_annotation$Gene.model)
 all(rownames(countdata.sorted) ==  rownames(gene_annotation))
 
 # Obtain KOG annotations for P. damicornis genome
-gene2kog <- gene_annotation %>% select(ID, KOG_Class) %>% filter(KOG_Class != "")
+gene2kog <- gene_annotation %>% select(Gene.model, KOG_Class) %>% filter(KOG_Class != "")
 ```
 ```{r coldata}
 # Get sample data into tibble
@@ -292,8 +292,7 @@ pcoa1 <- ggplot(mds_col, aes(fill = Treatment)) +
 pcoa1title <- expression(paste("PCoA of overall ", italic("Pocillopora"), " spp. gene expression"))
 pcoa1 <- pcoa1 + ggtitle(pcoa1title, subtitle = "Plotted with colony centroids")
 pcoa1
-ggsave(pcoa1, filename = "~/Desktop/pcoa_colony.pdf", width = 80, height = 80, units = "mm", device = "pdf")
-ggsave(pcoa1, filename = "~/Desktop/Fig1_PCoA_Colony.pdf", width = 80, height = 80, units = "mm", device = "pdf")
+ggsave(pcoa1, filename = "../outputs/charts/pcoa_colony.pdf", width = 80, height = 80, units = "mm", device = "pdf")
 ```
 ```{r treatment pcoa}
 # Calculate Treatment centroids for plotting
@@ -325,8 +324,7 @@ pcoa2 <- ggplot(mds_trmt, aes(fill = Treatment)) +
 #pcoa2title <- expression(paste("PCoA of ", italic("Pocillopora"), " coral gene expression"))
 #pcoa2 <- pcoa2 + ggtitle(pcoa2title, subtitle = "Plotted with treatment centroids")
 pcoa2
-ggsave(pcoa2, filename = "~/Desktop/pcoa_treatment.pdf", width = 112, height = 80, units = "mm", device = "pdf")
-ggsave(pcoa2, filename = "~/Desktop/Fig1A_PCoA_Treatment.pdf", width = 112, height = 80, units = "mm", device = "pdf")
+ggsave(pcoa2, filename = "../outputs/charts/pcoa_treatment.pdf", width = 112, height = 80, units = "mm", device = "pdf")
 ```
 
 ### Variance partition
@@ -340,7 +338,7 @@ vpt <- sortCols(varpart_total)
 varplot <- plotVarPart(vpt, col = varcolors)
 vartitle <- expression(paste(italic("Pocillopora"), " spp. transcriptome variance partition"))
 varplot <- varplot + ggtitle(vartitle)
-ggsave(varplot, filename = "./manuscript_figures/FigS6_variancePartition_total.pdf", width = 120, height = 85, units = "mm", device = "pdf")
+ggsave(varplot, filename = "../outputs/charts/FigS6_variancePartition_total.pdf", width = 120, height = 85, units = "mm", device = "pdf")
 ```
 ```{r varpart_sum}
 vptdf <- as.data.frame(vpt) %>% rownames_to_column("gene")
@@ -471,7 +469,7 @@ length(dplyr::setdiff(ressig_heat, ressig_anti.heat))
 length(dplyr::setdiff(ressig_anti, ressig_heat))
 ```
 ```{r treatment_venn}
-pdf(file = "./outputs/DESeq-results/figures/Venn_AXH.pdf", height = 4, width = 4)
+pdf(file = "../outputs/DESeq-results/figures/Venn_AXH.pdf", height = 4, width = 4)
 vp = viewport(height = unit(4, "in"),  width = unit(4, "in"))
 grid.newpage()
 grid.rect(vp = vp, gp = gpar(col = "white"))
@@ -515,8 +513,7 @@ treatment_euler <- plot(fit,
      legend = FALSE, 
      adjust_labels = TRUE)
 treatment_euler
-ggsave(plot = treatment_euler, filename = "./outputs/DESeq-results/figures/Euler_AXH.pdf", width = 80, height = 80, units = "mm", device = "pdf")
-ggsave(plot = treatment_euler, filename = "./manuscript_figures/Fig1B_AXH_Euler.pdf", width = 70, height = 70, units = "mm", device = "pdf")
+ggsave(plot = treatment_euler, filename = "../outputs/DESeq-results/figures/Euler_AXH.pdf", width = 80, height = 80, units = "mm", device = "pdf")
 ```
 
 
@@ -529,7 +526,7 @@ For each of these plot styles, create data handling and plotting functions to pr
 ```
 ```{r}
 all_anti.control_volcano <- volcanoplot(DE$dsr[[1]])
-ggsave(filename = "~/Desktop/all_anti.control_volcano.pdf", height = 3, width = 4, device = "pdf")
+ggsave(filename = "../outputs/charts/all_anti.control_volcano.pdf", height = 3, width = 4, device = "pdf")
 ```
 
 
@@ -600,26 +597,26 @@ DE %>%
   filter(Colony == "all", num == "Heat", den == "control") %>%
   unnest(logP) %>%
   select(gene, logP) %>%
-  write.table(., file = "./R/GO_MWU/heat.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
+  write.table(., file = "../R/GO_MWU/heat.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
 ```
 ```{r heat GO_MWU}
 # Run GO_MWU for Heat vs. control for Biological Process (BP) GO terms
 commandArgs <- function(...) c("heat.control.logP.txt", "BP")
-source("./R/GO_MWU/GO_MWU.R")
+source("../R/GO_MWU/GO_MWU.R")
 
 # Run GO_MWU for Heat vs. control for Molecular Function GO terms
 commandArgs <- function(...) c("heat.control.logP.txt", "MF")
-source("./R/GO_MWU/GO_MWU.R")
+source("../R/GO_MWU/GO_MWU.R")
 
 # Run GO_MWU for Heat vs. control for Cellular Component (CC) GO terms
 commandArgs <- function(...) c("heat.control.logP.txt", "CC")
-source("./R/GO_MWU/GO_MWU.R")
+source("../R/GO_MWU/GO_MWU.R")
 ```
 ```{r heat.control_GO}
 heat.control.GO <- as.list(
-  c(BP = "./R/GO_MWU/MWU_BP_heat.control.logP.txt",
-    MF = "./R/GO_MWU/MWU_MF_heat.control.logP.txt",
-    CC = "./R/GO_MWU/MWU_CC_heat.control.logP.txt")
+  c(BP = "../R/GO_MWU/MWU_BP_heat.control.logP.txt",
+    MF = "../R/GO_MWU/MWU_MF_heat.control.logP.txt",
+    CC = "../R/GO_MWU/MWU_CC_heat.control.logP.txt")
   ) %>% map(read.table, header = T) %>%
   bind_rows(.id = "ontology") %>%
   as_tibble() %>%
@@ -628,18 +625,18 @@ heat.control.GO <- as.list(
 heat.control.GO %>%
   select(ontology, delta.rank, p.adj, name, nseqs, level, term) %>%
   arrange(ontology, p.adj) %>% 
-  write_csv(path = "./outputs/DESeq-results/GO_MWU/tables/heat.control.GO.csv")
+  write_csv(path = "../outputs/DESeq-results/GO_MWU/tables/heat.control.GO.csv")
 
 heat.control.GO %>% filter(p.adj < 0.01 & delta.rank >= 0) %>% count(ontology)
 ```
 ```{r heat GO_MWU plot}
 # Plot GO_MWU results for Heat vs. control 
 commandArgs <- function(...) c("heat.control.logP.txt", "BP", "GO_MWU.heat.control.pdf", 1e-6, 1e-8, 1e-10, 1.5)
-source("./R/GO_MWU/GO_MWU_plot.R")
+source("../R/GO_MWU/GO_MWU_plot.R")
 commandArgs <- function(...) c("heat.control.logP.txt", "MF", "GO_MWU.heat.control_slim.pdf", 0.05, 0.01, 1e-3, 1)
-source("./R/GO_MWU/GO_MWU_plot.R")
+source("../R/GO_MWU/GO_MWU_plot.R")
 commandArgs <- function(...) c("heat.control.logP.txt", "CC", "GO_MWU.heat.control_slim.pdf", 0.05, 0.01, 1e-3, 1)
-source("./R/GO_MWU/GO_MWU_plot.R")
+source("../R/GO_MWU/GO_MWU_plot.R")
 ```
 ### Antibiotics vs. control 
 ```{r anti signed logP}
@@ -648,26 +645,26 @@ DE %>%
   filter(Colony == "all", num == "Antibiotics", den == "control") %>%
   unnest(logP) %>%
   select(gene, logP) %>%
-  write.table(., file = "./R/GO_MWU/anti.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
+  write.table(., file = "../R/GO_MWU/anti.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
 ```
 ```{r anti GO_MWU}
 # Run GO_MWU for Antibiotics vs. control for Biological Process (BP) GO terms
 commandArgs <- function(...) c("anti.control.logP.txt", "BP")
-source("./R/GO_MWU/GO_MWU.R")
+source("../R/GO_MWU/GO_MWU.R")
 
 # Run GO_MWU for Antibiotics vs. control for Molecular Function GO terms
 commandArgs <- function(...) c("anti.control.logP.txt", "MF")
-source("./R/GO_MWU/GO_MWU.R")
+source("../R/GO_MWU/GO_MWU.R")
 
 # Run GO_MWU for Antibiotics vs. control for Cellular Component (CC) GO terms
 commandArgs <- function(...) c("anti.control.logP.txt", "CC")
-source("./R/GO_MWU/GO_MWU.R")
+source("../R/GO_MWU/GO_MWU.R")
 ```
 ```{r anti.control_GO}
 anti.control.GO <- as.list(
-  c(BP = "./R/GO_MWU/MWU_BP_anti.control.logP.txt",
-    MF = "./R/GO_MWU/MWU_MF_anti.control.logP.txt",
-    CC = "./R/GO_MWU/MWU_CC_anti.control.logP.txt")
+  c(BP = "../R/GO_MWU/MWU_BP_anti.control.logP.txt",
+    MF = "../R/GO_MWU/MWU_MF_anti.control.logP.txt",
+    CC = "../R/GO_MWU/MWU_CC_anti.control.logP.txt")
   ) %>% map(read.table, header = T) %>%
   bind_rows(.id = "ontology") %>%
   as_tibble() %>%
@@ -676,18 +673,18 @@ anti.control.GO <- as.list(
 anti.control.GO %>%
   select(ontology, delta.rank, p.adj, name, nseqs, level, term) %>%
   arrange(ontology, p.adj) %>% 
-  write_csv(path = "./outputs/DESeq-results/GO_MWU/tables/anti.control.GO.csv")
+  write_csv(path = "../R/GO_MWU/tables/anti.control.GO.csv")
 
 anti.control.GO %>% filter(p.adj < 0.01 & delta.rank >= 0) %>% count(ontology)
 ```
 ```{r anti GO_MWU plot}
 # Plot GO_MWU results for Antibiotics vs. control 
 commandArgs <- function(...) c("anti.control.logP.txt", "BP", "GO_MWU.anti.control.pdf", 1e-3, 1e-4, 1e-5, 1.5)
-source("./R/GO_MWU/GO_MWU_plot.R")
+source("../R/GO_MWU/GO_MWU_plot.R")
 commandArgs <- function(...) c("anti.control.logP.txt", "MF", "GO_MWU.anti.control_slim.pdf", 5e-2, 1e-2, 1e-3, 1.0)
-source("./R/GO_MWU/GO_MWU_plot.R")
+source("../R/GO_MWU/GO_MWU_plot.R")
 commandArgs <- function(...) c("anti.control.logP.txt", "CC", "GO_MWU.anti.control_slim.pdf", 5e-2, 1e-2, 1e-3, 1.0)
-source("./R/GO_MWU/GO_MWU_plot.R")
+source("../R/GO_MWU/GO_MWU_plot.R")
 ```
 ### Antibiotics.Heat vs. control 
 ```{r anti.heat signed logP}
@@ -696,26 +693,26 @@ DE %>%
   filter(Colony == "all", num == "Antibiotics.Heat", den == "control") %>%
   unnest(logP) %>%
   select(gene, logP) %>%
-  write.table(., file = "./R/GO_MWU/anti.heat.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
+  write.table(., file = "../R/GO_MWU/anti.heat.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
 ```
 ```{r anti.heat GO_MWU}
 # Run GO_MWU for Antibiotics.Heat vs. control for Biological Process (BP) GO terms
 commandArgs <- function(...) c("anti.heat.control.logP.txt", "BP")
-source("./R/GO_MWU/GO_MWU.R")
+source("../R/GO_MWU/GO_MWU.R")
 
 # Run GO_MWU for Antibiotics.Heat vs. control for Molecular Function GO terms
 commandArgs <- function(...) c("anti.heat.control.logP.txt", "MF")
-source("./R/GO_MWU/GO_MWU.R")
+source("../R/GO_MWU/GO_MWU.R")
 
 # Run GO_MWU for Antibiotics.Heat vs. control for Cellular Component (CC) GO terms
 commandArgs <- function(...) c("anti.heat.control.logP.txt", "CC")
-source("./R/GO_MWU/GO_MWU.R")
+source("../R/GO_MWU/GO_MWU.R")
 ```
 ```{r anti.heat.control_GO}
 anti.heat.control.GO <- as.list(
-  c(BP = "./R/GO_MWU/MWU_BP_anti.heat.control.logP.txt",
-    MF = "./R/GO_MWU/MWU_MF_anti.heat.control.logP.txt",
-    CC = "./R/GO_MWU/MWU_CC_anti.heat.control.logP.txt")
+  c(BP = "../R/GO_MWU/MWU_BP_anti.heat.control.logP.txt",
+    MF = "../R/GO_MWU/MWU_MF_anti.heat.control.logP.txt",
+    CC = "../R/GO_MWU/MWU_CC_anti.heat.control.logP.txt")
   ) %>% map(read.table, header = T) %>%
   bind_rows(.id = "ontology") %>%
   as_tibble() %>%
@@ -731,11 +728,11 @@ anti.heat.control.GO %>% filter(p.adj < 0.01 & delta.rank >= 0) %>% count(ontolo
 ```{r anti.heat GO_MWU plot}
 # Plot GO_MWU results for Antibiotics.Heat vs. control 
 commandArgs <- function(...) c("anti.heat.control.logP.txt", "BP", "GO_MWU.anti.heat.control_slim.pdf", 5e-2, 1e-2, 1e-3, 1.0)
-source("./R/GO_MWU/GO_MWU_plot.R")
+source("../R/GO_MWU/GO_MWU_plot.R")
 commandArgs <- function(...) c("anti.heat.control.logP.txt", "MF", "GO_MWU.anti.heat.control_slim.pdf", 5e-2, 1e-2, 1e-3, 1.0)
-source("./R/GO_MWU/GO_MWU_plot.R")
+source("../R/GO_MWU/GO_MWU_plot.R")
 commandArgs <- function(...) c("anti.heat.control.logP.txt", "CC", "GO_MWU.anti.heat.control_slim.pdf", 5e-2, 1e-2, 1e-3, 1.0)
-source("./R/GO_MWU/GO_MWU_plot.R")
+source("../R/GO_MWU/GO_MWU_plot.R")
 ```
 ```{r allGO}
 #Supplemental table with all GO results
@@ -747,7 +744,7 @@ allGO <- bind_rows(.id = "contrast",
   select(contrast, ontology, delta.rank, name, p.adj) %>%
   arrange(contrast, ontology, sign(delta.rank), p.adj)
 
-write_csv(allGO, path = "./outputs/DESeq-results/GO_MWU/allGO.csv")
+write_csv(allGO, path = "../outputs/DESeq-results/GO_MWU/allGO.csv")
 ```
 
 ## DESeq EuKaryotic Orthologous Groups (KOG) enrichment analysis
@@ -787,13 +784,13 @@ View(kogtables$Heat.control)
 
 KOG_heat.control <- KOGheatmap(kogtables$Heat.control, kogpvals$Heat.control, main = "Heat vs. Control", 
                       fontsize = 6)
-ggsave(filename = "./outputs/DESeq-results/KOGMWU/figures/KOGheat.control.pdf", plot = KOG_heat.control, width = 80, height = 85, units = "mm", device = "pdf")
+ggsave(filename = "../outputs/DESeq-results/KOGMWU/figures/KOGheat.control.pdf", plot = KOG_heat.control, width = 80, height = 85, units = "mm", device = "pdf")
 KOG_anti.control <- KOGheatmap(kogtables$Antibiotics.control, kogpvals$Antibiotics.control, main = "Antibiotics vs. Control", 
                       fontsize = 6)
-ggsave(filename = "./outputs/DESeq-results/KOGMWU/figures/KOGanti.control.pdf", plot = KOG_anti.control, width = 80, height = 85, units = "mm", device = "pdf")
+ggsave(filename = "../outputs/DESeq-results/KOGMWU/figures/KOGanti.control.pdf", plot = KOG_anti.control, width = 80, height = 85, units = "mm", device = "pdf")
 KOG_anti.heat.control <- KOGheatmap(kogtables$Antibiotics.Heat.control, kogpvals$Antibiotics.Heat.control, main = "Antibiotics + Heat vs. Control", 
                       fontsize = 6)
-ggsave(filename = "./outputs/DESeq-results/KOGMWU/figures/KOGanti.heat.control.pdf", plot = KOG_anti.heat.control, width = 80, height = 85, units = "mm", device = "pdf")
+ggsave(filename = "../outputs/DESeq-results/KOGMWU/figures/KOGanti.heat.control.pdf", plot = KOG_anti.heat.control, width = 80, height = 85, units = "mm", device = "pdf")
 ```
 ```{r KOG_treatment contrasts}
 kogtable_contrasts <- KOG %>%
@@ -814,7 +811,7 @@ kogpval_contrast <- KOG %>%
   transmute_all(gtools::stars.pval)
 
 kog_contrasts <- bind_cols(kogtable_contrast, kogpval_constrasts)
-write_csv(kog_contrasts, path = "./outputs/DESeq-results/KOGMWU/kog_contrasts.csv")
+write_csv(kog_contrasts, path = "../outputs/DESeq-results/KOGMWU/kog_contrasts.csv")
 
 KOGtitle <- expression(plain("Heatmap of KOG classes delta ranks"))
 contrast_labs <- c(expression("Heat"~"vs."~"Control"),
@@ -830,8 +827,7 @@ KOG_treatments <- KOGheatmap(
   fontsize_row = 7,
   fontsize_col = 8)
 
-ggsave(filename = "./outputs/DESeq-results/KOGMWU/figures/KOG_treatment_heatmap.pdf", KOG_treatments, width = 80, height = 85, units = "mm")
-ggsave(filename = "./manuscript_figures/Fig1C_KOGheatmap.pdf", KOG_treatments, width = 112, height = 92, units = "mm")
+ggsave(filename = "../outputs/DESeq-results/KOGMWU/figures/KOG_treatment_heatmap.pdf", KOG_treatments, width = 80, height = 85, units = "mm")
 ```
 
 ## Discriminant analysis of principal components (DAPC)
@@ -942,7 +938,7 @@ dapcplot <- plot_grid(xplot, NULL, dapc.fig, yplot,
                       greedy = FALSE)
 dapcplot
 
-ggsave(filename = "~/Desktop/Fig2_DAPC.pdf", plot = dapcplot, width = 120, height = 115, units = "mm", device = "pdf")
+ggsave(filename = "../outputs/charts/Fig2_DAPC.pdf", plot = dapcplot, width = 120, height = 115, units = "mm", device = "pdf")
 ```
 The DAPC clearly shows two distinct axes of stress responses among the antibiotics, heat stress, and combined stressors. 
 The first linear discriminant function (LD1) separates antibiotics-treated fragments from non-treated fragments in the control and heat stress treatments.
@@ -975,7 +971,7 @@ mat_ld1 <- mat_ld1 - rowMeans(mat_ld1)
 load_ld1_barplot <- HeatmapAnnotation("DAPC LD1 loading" = anno_barplot(dpvarc_ld1$LD1[1:ntop]),
                                       which = "row")
 # create heatmap
-pdf("~/Desktop/DAPC_LD1_10genes_heatmap_clustered.pdf", height = 8.5, width = 11)
+pdf("../outputs/charts/DAPC_LD1_10genes_heatmap_clustered.pdf", height = 8.5, width = 11)
 heatmapLD1 <- Heatmap(mat_ld1,
         #row_order = rownames(mat_ld1),
         col = col_fun_ge(mat_ld1),
@@ -996,7 +992,7 @@ heatmapLD1 <- Heatmap(mat_ld1,
 draw(heatmapLD1, heatmap_legend_side = "left", legend_title_gp = gpar(fontsize = 10, fontface = "plain"), padding = unit(c(0.5, -2.0, 0.5, 0.5), "in"))
 ```
 ```{r dapc_boxplots_ld1}
-pdf("~/Desktop/DAPC_LD1_loadings_10genes_boxplots.pdf", height = 3.5, width = 5)
+pdf("../outputs/charts/DAPC_LD1_loadings_10genes_boxplots.pdf", height = 3.5, width = 5)
 for (i in 1:10) {
   genoboxplot(dpvarc_ld1$ID[i])
 }
@@ -1011,7 +1007,7 @@ mat_ld2 <- mat_ld2 - rowMeans(mat_ld2)
 load_ld2_barplot <- HeatmapAnnotation("DAPC LD2 loading" = anno_barplot(dpvarc_ld2$LD2[1:ntop]),
                                       which = "row")
 # create heatmap
-pdf("~/Desktop/DAPC_LD2_10genes_heatmap_clustered.pdf", height = 8.5, width = 11)
+pdf("../outputs/charts/DAPC_LD2_10genes_heatmap_clustered.pdf", height = 8.5, width = 11)
 heatmapLD2 <- Heatmap(mat_ld2,
         #row_order = rownames(mat_ld2),
         col = col_fun_ge(mat_ld2),
@@ -1032,7 +1028,7 @@ heatmapLD2 <- Heatmap(mat_ld2,
 draw(heatmapLD2, heatmap_legend_side = "left", legend_title_gp = gpar(fontsize = 10, fontface = "plain"), padding = unit(c(0.5, -2.0, 0.5, 0.5), "in"))
 ```
 ```{r dapc_boxplots_ld2}
-pdf("~/Desktop/DAPC_LD2_loadings_10genes_boxplots.pdf", height = 3.5, width = 5)
+pdf("../outputs/charts/DAPC_LD2_loadings_10genes_boxplots.pdf", height = 3.5, width = 5)
 for (i in 1:10) {
   genoboxplot(dpvarc_ld2$ID[i])
 }
@@ -1239,8 +1235,7 @@ mergedColors <- mergedMods$colors
 table(mergedColors)
 ```
 ```{r dendrogram_modules}
-pdf(file = "./outputs/WGCNA-results/dendrogram.pdf", width = 8, height = 6)
-pdf(file = "./manuscript_figures/FigS##_WGCNA_dendrogram.pdf", width = 8, height = 6)
+pdf(file = "../outputs/WGCNA-results/dendrogram.pdf", width = 8, height = 6)
 # Plot the dendrogram and the module colors underneath
 plotDendroAndColors(dendro = geneTree, 
                     colors = cbind(dynamicColors, mergedColors),
@@ -1399,7 +1394,7 @@ inModule <- (moduleColors == module)
 # Get gene IDs
 modGeneIDs <- Genes[inModule] #this is the correct set of gene IDs!
 # Write gene annotations into a file
-fileName = paste("./outputs/WGCNA-results/notes/", module, ".csv", sep="");
+fileName = paste("../outputs/WGCNA-results/notes/", module, ".csv", sep="");
 module_annotation <- gene_annotation[modGeneIDs, ]
 write_csv(module_annotation, path = fileName)
 }
@@ -1421,31 +1416,31 @@ modkME$kME[modkME$moduleColor!=module] <- 0  #also need to change column names f
 modkME <- modkME %>% select(., -moduleColor)
 # write csv
 #write.csv(modkME, file = paste("./outputs/WGCNA-results/tables/", module,"_kme.csv",sep=""), quote=F, row.names=F)
-write.csv(modkME, file = paste("./R/GO_MWU/", module,"_kme.txt",sep=""), quote=F, row.names=F)
+write.csv(modkME, file = paste("../R/GO_MWU/", module,"_kme.txt",sep=""), quote=F, row.names=F)
 #repeat for each module
 }
 ```
 ```{r module_GO_MWU}
 # Run GO_MWU for salmon module for Biological Process (BP) GO terms
 commandArgs <- function(...) c("salmon_kme.txt", "BP")
-source("./R/GO_MWU/GO_MWU_WGCNA.R")
+source("../R/GO_MWU/GO_MWU_WGCNA.R")
 
 # Run GO_MWU for Heat vs. control for Molecular Function GO terms
 commandArgs <- function(...) c("brown_kme.txt", "MF")
-source("./R/GO_MWU/GO_MWU_WGCNA.R")
+source("../R/GO_MWU/GO_MWU_WGCNA.R")
 
 # Run GO_MWU for Heat vs. control for Cellular Component (CC) GO terms
 commandArgs <- function(...) c("salmon_kme.txt", "CC")
-source("./R/GO_MWU/GO_MWU.R")
+source("../R/GO_MWU/GO_MWU.R")
 ```
 ```{r module GO_MWU plot}
 # Plot GO_MWU results
 commandArgs <- function(...) c("salmon_kme.txt", "BP", "GO_MWU.salmon.png")
-source("./R/GO_MWU/GO_MWU_WGCNA_plot.R")
+source("../R/GO_MWU/GO_MWU_WGCNA_plot.R")
 commandArgs <- function(...) c("salmon_kme.txt", "MF", "GO_MWU.salmon.png")
-source("./R/GO_MWU/GO_MWU_WGCNA_plot.R")
+source("../R/GO_MWU/GO_MWU_WGCNA_plot.R")
 commandArgs <- function(...) c("salmon_kme.txt", "CC", "GO_MWU.salmon.png")
-source("./R/GO_MWU/GO_MWU_plot.R")
+source("../R/GO_MWU/GO_MWU_plot.R")
 ```
 ```{r module_GO_MWU_loop}
 #kMEfiles <- list.files(path = "./R/GO_MWU/", pattern = "_kme.txt")
@@ -1457,7 +1452,7 @@ for (module in intModules[c(12)]){
   #input file name
 tab <- paste(module, "_kme.txt", sep = "")
   commandArgs <- function(...) c(tab, "BP")
-  source("./R/GO_MWU/GO_MWU_WGCNA.R")
+  source("../R/GO_MWU/GO_MWU_WGCNA.R")
 }
 ```
 ```{r GO_MWU_figures}
@@ -1474,18 +1469,18 @@ source("./R/GO_MWU/GO_MWU_WGCNA_plot.R")
 ```
 ```{r modules_GO}
 modules.GO <- as.list(
-  c(greenyellow = "./R/GO_MWU/MWU_BP_greenyellow_kme.txt",
-    brown = "./R/GO_MWU/MWU_BP_brown_kme.txt",
-    lightcyan1 = "./R/GO_MWU/MWU_BP_lightcyan1_kme.txt",
-    darkgrey = "./R/GO_MWU/MWU_BP_darkgrey_kme.txt",
-    darkred = "./R/GO_MWU/MWU_BP_darkred_kme.txt",
-    midnightblue = "./R/GO_MWU/MWU_BP_midnightblue_kme.txt",
-    grey60 = "./R/GO_MWU/MWU_BP_grey60_kme.txt",
-    darkorange = "./R/GO_MWU/MWU_BP_darkorange_kme.txt",
-    skyblue = "./R/GO_MWU/MWU_BP_skyblue_kme.txt",
-    paleturquoise = "./R/GO_MWU/MWU_BP_paleturquoise_kme.txt",
-    violet = "./R/GO_MWU/MWU_BP_violet_kme.txt",
-    orangered4 = "./R/GO_MWU/MWU_BP_orangered4_kme.txt")
+  c(greenyellow = "../R/GO_MWU/MWU_BP_greenyellow_kme.txt",
+    brown = "../R/GO_MWU/MWU_BP_brown_kme.txt",
+    lightcyan1 = "../R/GO_MWU/MWU_BP_lightcyan1_kme.txt",
+    darkgrey = "../R/GO_MWU/MWU_BP_darkgrey_kme.txt",
+    darkred = "../R/GO_MWU/MWU_BP_darkred_kme.txt",
+    midnightblue = "../R/GO_MWU/MWU_BP_midnightblue_kme.txt",
+    grey60 = "../R/GO_MWU/MWU_BP_grey60_kme.txt",
+    darkorange = "../R/GO_MWU/MWU_BP_darkorange_kme.txt",
+    skyblue = "../R/GO_MWU/MWU_BP_skyblue_kme.txt",
+    paleturquoise = "../R/GO_MWU/MWU_BP_paleturquoise_kme.txt",
+    violet = "../R/GO_MWU/MWU_BP_violet_kme.txt",
+    orangered4 = "../R/GO_MWU/MWU_BP_orangered4_kme.txt")
   ) %>% map(read.table, header = T) %>%
   bind_rows(.id = "module") %>%
   as_tibble() %>%
@@ -1494,7 +1489,7 @@ modules.GO <- as.list(
 modules.GO %>%
   select(module, delta.rank, p.adj, name, nseqs, level, term) %>%
   arrange(module, p.adj) %>% 
-  write_csv(path = "./outputs/WGCNA-results/GO_MWU/modules.GO.csv")
+  write_csv(path = "../outputs/WGCNA-results/GO_MWU/modules.GO.csv")
 
 modules.GO %>%
   filter(p.adj < 0.05 & delta.rank >= 0) %>% 
@@ -1547,13 +1542,13 @@ modkogpvals <- modKOG %>%
 ```{r modKOG_heatmaps}
 KOG_brown <- KOGheatmap(modkogtables$brown, modkogpvals$brown, main = "Brown", 
                       fontsize = 6)
-ggsave(filename = "./outputs/WGCNA-results/KOGMWU/KOGheat.control.pdf", plot = KOG_brown, width = 80, height = 85, units = "mm", device = "pdf")
+ggsave(filename = "../outputs/WGCNA-results/KOGMWU/KOGheat.control.pdf", plot = KOG_brown, width = 80, height = 85, units = "mm", device = "pdf")
 
 ```
 ```{r modules_KOG_heatmap}
 modkog_all <- bind_cols(modkogtables, modkogpvals)
 modkog_all$term <- rownames(modkogtables)
-write_csv(modkog_all, path = "./outputs/WGCNA-results/KOGMWU/kog_modules.csv")
+write_csv(modkog_all, path = "../outputs/WGCNA-results/KOGMWU/kog_modules.csv")
 
 modkogtable <- modKOG %>%
   unnest(KOG) %>%
@@ -1576,7 +1571,7 @@ KOG_modules <- KOGheatmap(modkogtable, modkogpadj,
   fontsize_row = 7,
   fontsize_col = 8)
 
-ggsave(filename = "./outputs/WGCNA-results/KOGMWU/KOG_modules_heatmap.pdf", KOG_modules, width = 200, height = 170, units = "mm")
+ggsave(filename = "../outputs/WGCNA-results/KOGMWU/KOG_modules_heatmap.pdf", KOG_modules, width = 200, height = 170, units = "mm")
 ```
 ```{r ComplexHeatmap_annotation}
 # column annotation for treatments
@@ -1595,7 +1590,7 @@ module_annotation_col <- HeatmapAnnotation(modules = moddf$module_colors,
 ```
 
 ```{r modKOG_ComplexHeatmap}
-pdf(file = "./outputs/WGCNA-results/figures/ME_complexheatmap_KOG.pdf", width = 8, height = 6)
+pdf(file = "../outputs/WGCNA-results/figures/ME_complexheatmap_KOG.pdf", width = 8, height = 6)
 kog_heatmap <- Heatmap(modkogtable,
                       # col = col_fun_ge(modkogtable),
                       cell_fun = function(j, i, x, y, width, height, fill) {grid.text(sprintf("%s", modkogpadj[i, j]), x, y, gp = gpar(fontsize = 6))},
@@ -1625,7 +1620,7 @@ draw(kog_heatmap, column_title = "Module KOG enrichment heatmap",
 column_order(kog_heatmap)
 ```
 ```{r}
-pdf("./outputs/WGCNA-results/figures/modules_KOGenrichment_heatmap.pdf", height = 8.5, width = 10)
+pdf("../outputs/WGCNA-results/figures/modules_KOGenrichment_heatmap.pdf", height = 8.5, width = 10)
 kog_heatmap2 <- Heatmap(t(modkogtable),
                       # col = col_fun_delta(modkogtable),
                       cell_fun = function(j, i, x, y, width, height, fill) {grid.text(sprintf("%s", t(modkogpadj)[i, j]), x, y, gp = gpar(fontsize = 6))},
@@ -1654,7 +1649,7 @@ draw(kog_heatmap2, column_title = "Module KOG enrichment heatmap",
      )
 ```
 ```{r}
-pdf("./outputs/WGCNA-results/modules_correlations_KOGenrichment_heatmap.pdf", height = 8, width = 12)
+pdf("../outputs/WGCNA-results/modules_correlations_KOGenrichment_heatmap.pdf", height = 8, width = 12)
 combmap <- me_heatmap + kog_heatmap2
 draw(combmap,  show_annotation_legend = FALSE, heatmap_legend_side = "left")
 ```
@@ -1700,7 +1695,7 @@ datKME.GS$ID <- Genes[restModule]
 hikME <- datKME.GS %>%
   arrange(desc(GS)) %>% 
   left_join(., gene_annotation, by = "ID")
-write_csv(hikME, path = paste("./outputs/WGCNA-results/tables/", module, "_kME.csv", sep = ""))
+write_csv(hikME, path = paste("../outputs/WGCNA-results/tables/", module, "_kME.csv", sep = ""))
 
 coef <- coef(lm(GS ~ kME, data = hikME))
 g <- hikME %>% ggplot(., aes(GS, kME)) + geom_point(color = module) + 
@@ -1730,7 +1725,7 @@ geneInfo <- geneInfo[order(geneInfo$module, geneInfo$membership, decreasing=T), 
 ```
 ```{r}
 #plot eigengenes along with highly correlated individual genes
-pdf(file = "./outputs/WGCNA-results/figures/ModuleProfiles.pdf", width = 4.5, height = 3.5)
+pdf(file = "../outputs/WGCNA-results/figures/ModuleProfiles.pdf", width = 4.5, height = 3.5)
 
 #initialize plot with eigengene -- we scale the expression value to mean=0 sd=1 so we can compare profiles of genes with different absolute expression levels
 colnames(MEs1) <- module_colors
@@ -1764,7 +1759,7 @@ modTOM = TOM[inModule, inModule]
 dimnames(modTOM) = list(modGeneIDs, modGeneIDs)
 # Export the network into an edge list file VisANT can read
 vis = exportNetworkToVisANT(modTOM[conmodGeneIDs,conmodGeneIDs],
-file = paste("./outputs/WGCNA-results/lists/", "VisANTInput-con-", gsub("E", "", module), ".txt", sep=""),
+file = paste("../outputs/WGCNA-results/lists/", "VisANTInput-con-", gsub("E", "", module), ".txt", sep=""),
 weighted = TRUE,
 threshold = 0,
 probeToGene = data.frame(conmodGeneIDs, conmodGeneNames))
@@ -1775,7 +1770,7 @@ probeToGene = data.frame(conmodGeneIDs, conmodGeneNames))
 ```{r}
 ### Create differentially expressed gene matrix 
 #Create heatmap matrix and annotation groupings
-pdf(file = "./outputs/WGCNA-results/figures/darkorange_heatmap.pdf", height = 14, width = 11)
+pdf(file = "../outputs/WGCNA-results/figures/darkorange_heatmap.pdf", height = 14, width = 11)
 module <- "darkorange"
 #for(module in sigModules) {
 inModule <- moduleColors == module
@@ -1843,7 +1838,7 @@ for (i in 1:length(modulePhylaPvalue)){
 dim(textMatrix) <- dim(modulePhylaCor)
 #par(mar = c(10, 8.5, 3, 3));
 # Display the correlation values within a heatmap plot
-pdf(file = "./outputs/WGCNA-results/figures/ME_phyla_heatmap.pdf", width = 11, height = 8.5)
+pdf(file = "../outputs/WGCNA-results/figures/ME_phyla_heatmap.pdf", width = 11, height = 8.5)
 labeledHeatmap(Matrix = modulePhylaCor,
                colors = geneexpcolors2,
                textMatrix = textMatrix,
@@ -1902,7 +1897,7 @@ module_barplot <- HeatmapAnnotation(module_size = anno_barplot(moddf$module_size
                                     )
 ```
 ```{r ME_phyla_heatmap_ComplexHeatmap}
-pdf(file = "./outputs/WGCNA-results/figures/ME_complexheatmap_phyla.pdf", width = 10, height = 8)
+pdf(file = "../outputs/WGCNA-results/figures/ME_complexheatmap_phyla.pdf", width = 10, height = 8)
 me_heatmap <- Heatmap(modulePhylaCor,
                       col = col_fun_cor,
                       cell_fun = function(j, i, x, y, width, height, fill) {grid.text(sprintf("%s", textMatrix[i, j]), x, y, gp = gpar(fontsize = 6))},
@@ -2303,13 +2298,13 @@ ggsave(plot = KOG_anti.heat.control, filename = "./manuscript_figures/FigS##_KOG
 ```{r}
 # Plot GO_MWU results for BP treatment contrasts
 commandArgs <- function(...) c("heat.control.logP.txt", "BP", "GO_MWU.heat.control.pdf", 1e-4, 1e-5, 1e-6, 1)
-source("./R/GO_MWU/GO_MWU_plot.R")
+source("../R/GO_MWU/GO_MWU_plot.R")
 
 commandArgs <- function(...) c("anti.control.logP.txt", "BP", "GO_MWU.anti.control.pdf", 1e-4, 1e-5, 1e-6, 1)
-source("./R/GO_MWU/GO_MWU_plot.R")
+source("../R/GO_MWU/GO_MWU_plot.R")
 
 commandArgs <- function(...) c("anti.heat.control.logP.txt", "BP", "GO_MWU.heat.control.pdf", 1e-4, 1e-5, 1e-6, 1)
-source("./R/GO_MWU/GO_MWU_plot.R")
+source("../R/GO_MWU/GO_MWU_plot.R")
 ```
 ## clusterProfiler
 ```{r}
