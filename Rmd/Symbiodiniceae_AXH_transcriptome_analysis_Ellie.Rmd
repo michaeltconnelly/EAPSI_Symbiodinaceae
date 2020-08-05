@@ -245,13 +245,15 @@ mcols(dds) <- cbind(mcols(dds), gene_annotation)
 dds <- dds[ rowSums(counts(dds)) > 10, ]
 ```
 
-## Visualize global gene expression
+## (DONE) Visualize global gene expression
 ```{r vst}
 # Normalize expression data for visualization purposes using VST tranformation
 vsd <- vst(dds, blind = TRUE)
 ```
 ```{r}
-ggPCA(vsd, samples, condcolors_AxH, pclab = c(1,2))
+PCA <- ggPCA(vsd, samples, condcolors_AxH, pclab = c(1,2))
+PCA
+ggsave(PCA, filename = "../outputs/charts/PCA.png", width = 170, height = 100, units = "mm", device = "png")
 ```
 ### Principal Coordinate Analysis (PCoA)
 ```{r mds, eval = TRUE}
@@ -292,7 +294,7 @@ pcoa1 <- ggplot(mds_col, aes(fill = Treatment)) +
 pcoa1title <- expression(paste("PCoA of overall ", italic("Pocillopora"), " spp. gene expression"))
 pcoa1 <- pcoa1 + ggtitle(pcoa1title, subtitle = "Plotted with colony centroids")
 pcoa1
-ggsave(pcoa1, filename = "../outputs/charts/pcoa_colony.pdf", width = 80, height = 80, units = "mm", device = "pdf")
+ggsave(pcoa1, filename = "../outputs/charts/pcoa_colony.png", width = 150, height = 150, units = "mm", device = "png")
 ```
 ```{r treatment pcoa}
 # Calculate Treatment centroids for plotting
@@ -324,7 +326,7 @@ pcoa2 <- ggplot(mds_trmt, aes(fill = Treatment)) +
 #pcoa2title <- expression(paste("PCoA of ", italic("Pocillopora"), " coral gene expression"))
 #pcoa2 <- pcoa2 + ggtitle(pcoa2title, subtitle = "Plotted with treatment centroids")
 pcoa2
-ggsave(pcoa2, filename = "../outputs/charts/pcoa_treatment.pdf", width = 112, height = 80, units = "mm", device = "pdf")
+ggsave(pcoa2, filename = "../outputs/charts/pcoa_treatment.png", width = 112, height = 80, units = "mm", device = "png")
 ```
 
 ### Variance partition
@@ -439,7 +441,7 @@ shared_DEGs_colonies <- DE %>%
   unnest(sig) %>%
   filter(Colony != "all") %>%
   group_by(num, den) %>%
-  dplyr::count(ID, log2FoldChange > 0) %>%   # In how many colonies is same gene DE in same direction?
+  dplyr::count(Gene.model, log2FoldChange > 0) %>%   # In how many colonies is same gene DE in same direction?
   summarise(`1 colony` = sum(n==1), `2 colonies` = sum(n==2), `3 colonies` = sum(n==3), `4 colonies` = sum(n==4))
 ```
 ### Assess similarity of responses across treatments
@@ -449,30 +451,52 @@ shared_DEGs_treatments <- DE %>%
   #filter(Colony == "all") %>%
   filter(den == "control") %>% 
   group_by(Colony) %>%
-  dplyr::count(ID, log2FoldChange > 0) %>% #View()
+  dplyr::count(Gene.model, log2FoldChange > 0) %>% #View()
   summarise(`1 treatment` = sum(n==1), `2 treatments` = sum(n==2), `3 treatments` = sum(n==3))
 ```
 
 ```{r}
-ressig_heat <- DE$sig[DE$num == "Heat" & DE$den == "control" & DE$Colony == "all"][[1]]$ID
+#View(DE$sig)
+#View(DE$den)
+#View(DE$num)
+#View(DE$Colony)
+
+#--ressig_heat <- DE$sig[DE$num == "Heat" & DE$den == "control" & DE$Colony == "all"][[1]]$Gene.model
+#--ressig_anti <-  DE$sig[DE$num == "Antibiotics" & DE$den == "control" & DE$Colony == "all"][[1]]$Gene.model
+#--ressig_anti.heat <-  DE$sig[DE$num == "Antibiotics.Heat" & DE$den == "control" & DE$Colony == "all"][[1]]$Gene.model
+
+ressig_heat <- DE$sig[DE$num == "Heat" & DE$den == "control" & DE$Colony == "all"][[1]]
 ressig_anti <-  DE$sig[DE$num == "Antibiotics" & DE$den == "control" & DE$Colony == "all"][[1]]
-ressig_anti.heat <-  DE$sig[DE$num == "Antibiotics.Heat" & DE$den == "control" & DE$Colony == "all"][[1]]$ID
+ressig_anti.heat <-  DE$sig[DE$num == "Antibiotics.Heat" & DE$den == "control" & DE$Colony == "all"][[1]]
 ```
 ```{r}
-AH <- intersect(ressig_anti, ressig_heat)
-AX <- intersect(ressig_anti, ressig_anti.heat)
-HX <- intersect(ressig_heat, ressig_anti.heat)
-AXH <- intersect(intersect(ressig_anti, ressig_heat), ressig_anti.heat)
+#--AH <- intersect(ressig_anti, ressig_heat)
+AH <- merge(ressig_anti, ressig_heat, by.x = "Gene.model", by.y = "Gene.model", all.x = FALSE, all.y = FALSE)
+#View(AH)
+#--AX <- intersect(ressig_anti, ressig_anti.heat)
+AX <- merge(ressig_anti, ressig_anti.heat, by.x = "Gene.model", by.y = "Gene.model", all.x = FALSE, all.y = FALSE)
+#View(AX)
+#--HX <- intersect(ressig_heat, ressig_anti.heat)
+HX <- merge(ressig_heat, ressig_anti.heat, by.x = "Gene.model", by.y = "Gene.model", all.x = FALSE, all.y = FALSE)
+#View(HX)
+#--AXH <- intersect(intersect(ressig_anti, ressig_heat), ressig_anti.heat)
+AXH <- merge(AH, ressig_anti.heat, by.x = "Gene.model", by.y = "Gene.model", all.x = FALSE, all.y = FALSE)
+#View(AXH)
+
+ressig_heat <- DE$sig[DE$num == "Heat" & DE$den == "control" & DE$Colony == "all"][[1]]$Gene.model
+ressig_anti <-  DE$sig[DE$num == "Antibiotics" & DE$den == "control" & DE$Colony == "all"][[1]]$Gene.model
+ressig_anti.heat <-  DE$sig[DE$num == "Antibiotics.Heat" & DE$den == "control" & DE$Colony == "all"][[1]]$Gene.model
 
 length(dplyr::setdiff(ressig_anti, ressig_anti.heat))
 length(dplyr::setdiff(ressig_heat, ressig_anti.heat))
 length(dplyr::setdiff(ressig_anti, ressig_heat))
 ```
 ```{r treatment_venn}
-pdf(file = "../outputs/DESeq-results/figures/Venn_AXH.pdf", height = 4, width = 4)
+pdf(file = "../outputs/DESeq-results/figures/Venn_AXH.pdf", height = 4, width = 4) # Not working...
 vp = viewport(height = unit(4, "in"),  width = unit(4, "in"))
 grid.newpage()
 grid.rect(vp = vp, gp = gpar(col = "white"))
+
 
 OverVenn <- draw.triple.venn(area1 = length(ressig_anti),
                              area2 = length(ressig_heat),
@@ -490,14 +514,17 @@ OverVenn <- draw.triple.venn(area1 = length(ressig_anti),
                              alpha = c(rep(0.5, 3)),
                              cex = c(rep(2, 4), 3, rep(2, 2)),
                              fontface = c(rep("plain", 4), "bold", rep("plain", 2)),
-                             fontfamily = c(rep("Arial", 7)),
+                             #fontfamily = c(rep("Arial", 7)),
                              label.col = c(rep("black", 4), "black", rep("black", 2)),
                              print.mode = "raw",
                              sigdigs = 2,
                              euler.d = TRUE,
                              overrideTriple = "override",
-                             scaled = FALSE)
+                             scaled = FALSE,
+                             direct.area = TRUE
+                             )
 grid.draw(OverVenn)
+
 ```
 
 ```{r treatent_eulerr}
@@ -517,7 +544,7 @@ ggsave(plot = treatment_euler, filename = "../outputs/DESeq-results/figures/Eule
 ```
 
 
-## DESeq results visualizations
+## (DONE) DESeq results visualizations
 ### Volcano plots
 
 For each of these plot styles, create data handling and plotting functions to process essential inputs into the plot
@@ -938,7 +965,7 @@ dapcplot <- plot_grid(xplot, NULL, dapc.fig, yplot,
                       greedy = FALSE)
 dapcplot
 
-ggsave(filename = "../outputs/charts/Fig2_DAPC.pdf", plot = dapcplot, width = 120, height = 115, units = "mm", device = "pdf")
+ggsave(filename = "../outputs/charts/Fig2_DAPC.png", plot = dapcplot, width = 120, height = 115, units = "mm", device = "png")
 ```
 The DAPC clearly shows two distinct axes of stress responses among the antibiotics, heat stress, and combined stressors. 
 The first linear discriminant function (LD1) separates antibiotics-treated fragments from non-treated fragments in the control and heat stress treatments.
@@ -948,7 +975,7 @@ dp1
 summary(dp1)
 # dp1$tab
 dpvarc <- as.data.frame(dp1$var.contr) %>%
-  rownames_to_column("ID") %>% left_join(gene_annotation, by = "ID") %>%
+  rownames_to_column("Gene.model") %>% left_join(gene_annotation, by = "Gene.model") %>%
   arrange(desc(LD1))
 ```
 ```{r dapc_loadingplot}
@@ -970,6 +997,9 @@ mat_ld1 <- mat_ld1 - rowMeans(mat_ld1)
 # obtain LD1 loadings and create barplot annotation
 load_ld1_barplot <- HeatmapAnnotation("DAPC LD1 loading" = anno_barplot(dpvarc_ld1$LD1[1:ntop]),
                                       which = "row")
+
+#----------------------------NOT WORKING
+
 # create heatmap
 pdf("../outputs/charts/DAPC_LD1_10genes_heatmap_clustered.pdf", height = 8.5, width = 11)
 heatmapLD1 <- Heatmap(mat_ld1,
@@ -994,7 +1024,7 @@ draw(heatmapLD1, heatmap_legend_side = "left", legend_title_gp = gpar(fontsize =
 ```{r dapc_boxplots_ld1}
 pdf("../outputs/charts/DAPC_LD1_loadings_10genes_boxplots.pdf", height = 3.5, width = 5)
 for (i in 1:10) {
-  genoboxplot(dpvarc_ld1$ID[i])
+  genoboxplot(dpvarc_ld1$Gene.model[i])
 }
 ```
 ```{r dapc_heatmaps_ld2}
@@ -1030,7 +1060,7 @@ draw(heatmapLD2, heatmap_legend_side = "left", legend_title_gp = gpar(fontsize =
 ```{r dapc_boxplots_ld2}
 pdf("../outputs/charts/DAPC_LD2_loadings_10genes_boxplots.pdf", height = 3.5, width = 5)
 for (i in 1:10) {
-  genoboxplot(dpvarc_ld2$ID[i])
+  genoboxplot(dpvarc_ld2$Gene.model[i])
 }
 ```
 ```{r, include = FALSE, eval = FALSE}
