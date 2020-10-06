@@ -9,7 +9,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
-knitr::opts_knit$set(root.dir = "~/Documents/Research/EAPSI_Symbiodinaceae/Rmd/")
+knitr::opts_knit$set(root.dir = "~/Documents/Research/EAPSI_Symbiodinaceae/")#Rmd/
 options(stringsAsFactors = FALSE)
 ```
 ## (DONE) Setup packages and working directories

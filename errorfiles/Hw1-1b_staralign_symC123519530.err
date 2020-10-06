@@ -1,6 +1,0 @@
-
-EXITING: fatal error trying to allocate genome arrays, exception thrown: std::bad_alloc
-Possible cause 1: not enough RAM. Check if you have enough RAM 22407181770 bytes
-Possible cause 2: not enough virtual memory allowed with ulimit. SOLUTION: run ulimit -v 22407181770
-
-Apr 23 07:38:18 ...... FATAL ERROR, exiting
