@@ -10,7 +10,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
 # knitr::opts_knit$set(root.dir = "~/Documents/Research/EAPSI_Symbiodinaceae/")#Rmd/
-knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Pocillopora_AxH/")
+knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Symbiodinaceae/")
 options(stringsAsFactors = FALSE)
 ```
 ## (DONE) Setup packages and working directories
@@ -133,53 +133,25 @@ theme_set(theme_mec())
 ```
 
 ## (DONE) Import sample metadata, counts data, and gene annotation
-```{r data, echo=TRUE}
-samples <- read.table("../data/EAPSI_samples_AxH.txt", header = TRUE)
-samples$SampleID <- gsub('-','.', samples$SampleID)
-# Import and tidy counts data
-countdata <- read.csv("../outputs/AxH_SymC1.csv")
+```{r, echo=TRUE}
+stable_samples <- read.table("./data/EAPSI_samples_AxH.txt", header = TRUE)
+#stable_samples$treatment <- as.factor(stable_samples$treatment)
+#stable_samples$genotype <- as.factor(stable_samples$genotype)
+countdata <- read.delim("./outputs/SymC1_counts/AxH_SymC1.counts", comment.char="#")
+## Tidy counts data
+#Set Gene ID's as row names
 row.names(countdata) <- countdata$Geneid
-countdata <- countdata[ ,7:ncol(countdata)]
-countdata.sorted <- as.data.frame(countdata[order(rownames(countdata)),])
-#View(countdata)
-# Merge Geneid column and counts columns, cutting out middle columns
-#countcols <- (countdata[ ,7:ncol(countdata)])
-#idcol <- (countdata[1])
-#combinedcols <- data.frame(idcol, countcols)
-# Clip counts data so same number of rows as annotation data (there are more counts Geneid's than annotation ID's)
-#clipcounts <- merge(combinedcols, gene_annotation, by.x = "Geneid", by.y = "ID", all.x = FALSE, all.y = TRUE)
-# Showing unmatched counts genes
-#preclipcounts <- merge(combinedcols, gene_annotation, by.x = "Geneid", by.y = "ID", all.x = TRUE)
-#sum(is.na(preclipcounts$Description))
-#Adding missing IDs to dataframe
-#Missing = NULL
-#for(i in 1:length(preclipcounts$Description)) { 
-  #if(is.na(preclipcounts$Description[i])) {
-    #print(preclipcounts$Geneid[i])
-    #Identifiers = preclipcounts$Geneid[i]
-    #Missing = rbind(Missing, data.frame(Identifiers))
-  #}
-#}
-#write.csv(Missing, "~/Desktop/EAPSI_Pocillopora_AxH/Missing.csv")
-
-# Remove UniProt and Description columns
-#clipcounts <- clipcounts[1:48]
-# Set Gene ID's as row names
-#row.names(clipcounts) <- clipcounts$Geneid
-# Sort countdata by P. damicornis gene ID
-#countdata.sorted <- as.data.frame(clipcounts[order(rownames(clipcounts)),])
-#countdata.sorted <- countdata.sorted[-1]
-
-# Mike's original data...
-# Set Gene ID's as row names
-#--row.names(countdata) <- countdata$Geneid
 # Remove first six columns (Geneid, chr, start, end, strand, length)
-#--countdata <- countdata[ ,7:ncol(countdata)]
+countdata <- countdata[ ,7:ncol(countdata)]
 #countdata <- countdata[ ,6:ncol(countdata)]
 # Remove file prefixes and suffixes
+  colnames(countdata) <- gsub("X.", "", colnames(countdata))
+  colnames(countdata) <- gsub("scratch.projects.transcriptomics.mikeconnelly.projects.EAPSI_Symbiodinaceae_AxH.outputs.STARalign_SymC1.", "", colnames(countdata))
+  colnames(countdata) <- gsub("_SymC1Aligned.out.bam$", "", colnames(countdata))
 # Sort countdata by P. damicornis gene ID
-#--countdata.sorted <- as.data.frame(countdata[order(rownames(countdata)),])
+countdata.sorted <- as.data.frame(countdata[order(rownames(countdata)),])
 ```
+
 ```{r gene data}
 #gene_annotation <- read.delim(file = "./data/genome_annotations.tab", header = T) %>% arrange(ID)
 
@@ -194,8 +166,8 @@ gene_annotation <- as.data.frame(gene_annotation[order(rownames(gene_annotation)
 all(rownames(countdata.sorted) == gene_annotation$Gene.model)
 all(rownames(countdata.sorted) ==  rownames(gene_annotation))
 
-# Obtain KOG annotations for P. damicornis genome
-gene2kog <- gene_annotation %>% select(Gene.model, KOG_Class) %>% filter(KOG_Class != "")
+# Obtain KOG annotations for Cladocopium genome
+# gene2kog <- gene_annotation %>% select(Gene.model, KOG_Class) %>% filter(KOG_Class != "")
 ```
 ```{r coldata}
 # Get sample data into tibble
@@ -255,8 +227,9 @@ vsd <- vst(dds, blind = TRUE)
 ```{r}
 PCA <- ggPCA(vsd, samples, condcolors_AxH, pclab = c(1,2))
 PCA
-ggsave(PCA, filename = "../outputs/charts/PCA.png", width = 170, height = 100, units = "mm", device = "png")
+ggsave(PCA, filename = "./outputs/charts/PCA.png", width = 170, height = 100, units = "mm", device = "png")
 ```
+
 ### Principal Coordinate Analysis (PCoA)
 ```{r mds, eval = TRUE}
 ## Calculate distances among samples
@@ -530,7 +503,9 @@ grid.draw(OverVenn)
 ```
 
 ```{r treatent_eulerr}
-axh_list <- c(279, 54, 6775, 8, 605, 590, 126)
+# axh_list <- c(279, 54, 6775, 8, 605, 590, 126) 
+# Need to adjust for Symbiont gene sets
+
 names(axh_list) <- c("H", "A", "X", "H&A", "H&X", "A&X", "H&A&X")
 fit <- euler(axh_list, shape = "ellipse")
 treatment_euler <- plot(fit,
@@ -617,7 +592,7 @@ for (i in 1:10) {
 
 
 ### Double-treatment plots
-
+## Adjust paths for analysis
 ## DESeq Gene Ontology (GO) enrichment analysis
 ### Heat vs. control 
 ```{r heat signed logP}
@@ -626,7 +601,7 @@ DE %>%
   filter(Colony == "all", num == "Heat", den == "control") %>%
   unnest(logP) %>%
   select(gene, logP) %>%
-  write.table(., file = "../R/GO_MWU/heat.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
+  write.table(., file = "./R/GO_MWU/heat.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
 ```
 ```{r heat GO_MWU}
 # Run GO_MWU for Heat vs. control for Biological Process (BP) GO terms
@@ -1188,7 +1163,7 @@ net <- blockwiseModules(
   detectCutHeight = 0.99, # 0.99
   minModuleSize = min(100, ncol(datExpr)/5 ), # 50 minimum, One-fifth of all genes in expression matrix (4487) maximum
   # Module merging options
-  mergeCutHeight = 0.3, # 0.3
+  mergeCutHeight = 0.25, # 0.25 for symbiont analysis
   # Gene reassignment, module trimming, and module "significance" criteria
   # Output options
   numericLabels=T, 
