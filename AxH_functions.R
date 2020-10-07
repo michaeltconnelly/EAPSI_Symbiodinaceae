@@ -141,7 +141,7 @@ volcanoplot <- function(res) {
 
 ### Gene expression boxplot functions ------------------------------------------------------------------------------------
 ggboxplot <- function(gene) {
-  plotTitle <- gene_annotation %>% filter(Gene.model == gene) %>% select(Description.s..of.hit.s.)
+  plotTitle <- gene_annotation %>% filter(ID == gene) %>% select(Description)
   subTitle <- gene
   df <- plotCounts(dds, gene = gene, intgroup = "Treatment", returnData = TRUE)
   df$Treatment <- factor(df$Treatment, levels = c("control", "Heat", "Antibiotics", "Antibiotics.Heat"), ordered = TRUE)
@@ -160,7 +160,7 @@ ggboxplot <- function(gene) {
 
 
 genoboxplot <- function(gene) {
-  plotTitle <- gene_annotation %>% filter(Gene.model == gene) %>% select(Description.s..of.hit.s.)
+  plotTitle <- gene_annotation %>% filter(ID == gene) %>% select(Description)
   subTitle <- gene
   df <- plotCounts(dds, gene = gene, intgroup = "Treatment", returnData = TRUE)
   df$Treatment <- factor(df$Treatment, levels = c("control", "Heat", "Antibiotics", "Antibiotics.Heat"), ordered = TRUE)
