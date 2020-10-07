@@ -10,7 +10,7 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
 # knitr::opts_knit$set(root.dir = "~/Documents/Research/EAPSI_Symbiodinaceae/")#Rmd/
-knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Pocillopora_AxH/")
+knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Symbiodinaceae/")
 options(stringsAsFactors = FALSE)
 ```
 ## (DONE) Setup packages and working directories
@@ -133,53 +133,25 @@ theme_set(theme_mec())
 ```
 
 ## (DONE) Import sample metadata, counts data, and gene annotation
-```{r data, echo=TRUE}
-samples <- read.table("../data/EAPSI_samples_AxH.txt", header = TRUE)
-samples$SampleID <- gsub('-','.', samples$SampleID)
-# Import and tidy counts data
-countdata <- read.csv("../outputs/AxH_SymC1.csv")
+```{r, echo=TRUE}
+stable_samples <- read.table("./data/EAPSI_samples_AxH.txt", header = TRUE)
+#stable_samples$treatment <- as.factor(stable_samples$treatment)
+#stable_samples$genotype <- as.factor(stable_samples$genotype)
+countdata <- read.delim("./outputs/SymC1_counts/AxH_SymC1.counts", comment.char="#")
+## Tidy counts data
+#Set Gene ID's as row names
 row.names(countdata) <- countdata$Geneid
-countdata <- countdata[ ,7:ncol(countdata)]
-countdata.sorted <- as.data.frame(countdata[order(rownames(countdata)),])
-#View(countdata)
-# Merge Geneid column and counts columns, cutting out middle columns
-#countcols <- (countdata[ ,7:ncol(countdata)])
-#idcol <- (countdata[1])
-#combinedcols <- data.frame(idcol, countcols)
-# Clip counts data so same number of rows as annotation data (there are more counts Geneid's than annotation ID's)
-#clipcounts <- merge(combinedcols, gene_annotation, by.x = "Geneid", by.y = "ID", all.x = FALSE, all.y = TRUE)
-# Showing unmatched counts genes
-#preclipcounts <- merge(combinedcols, gene_annotation, by.x = "Geneid", by.y = "ID", all.x = TRUE)
-#sum(is.na(preclipcounts$Description))
-#Adding missing IDs to dataframe
-#Missing = NULL
-#for(i in 1:length(preclipcounts$Description)) { 
-  #if(is.na(preclipcounts$Description[i])) {
-    #print(preclipcounts$Geneid[i])
-    #Identifiers = preclipcounts$Geneid[i]
-    #Missing = rbind(Missing, data.frame(Identifiers))
-  #}
-#}
-#write.csv(Missing, "~/Desktop/EAPSI_Pocillopora_AxH/Missing.csv")
-
-# Remove UniProt and Description columns
-#clipcounts <- clipcounts[1:48]
-# Set Gene ID's as row names
-#row.names(clipcounts) <- clipcounts$Geneid
-# Sort countdata by P. damicornis gene ID
-#countdata.sorted <- as.data.frame(clipcounts[order(rownames(clipcounts)),])
-#countdata.sorted <- countdata.sorted[-1]
-
-# Mike's original data...
-# Set Gene ID's as row names
-#--row.names(countdata) <- countdata$Geneid
 # Remove first six columns (Geneid, chr, start, end, strand, length)
-#--countdata <- countdata[ ,7:ncol(countdata)]
+countdata <- countdata[ ,7:ncol(countdata)]
 #countdata <- countdata[ ,6:ncol(countdata)]
 # Remove file prefixes and suffixes
+  colnames(countdata) <- gsub("X.", "", colnames(countdata))
+  colnames(countdata) <- gsub("scratch.projects.transcriptomics.mikeconnelly.projects.EAPSI_Symbiodinaceae_AxH.outputs.STARalign_SymC1.", "", colnames(countdata))
+  colnames(countdata) <- gsub("_SymC1Aligned.out.bam$", "", colnames(countdata))
 # Sort countdata by P. damicornis gene ID
-#--countdata.sorted <- as.data.frame(countdata[order(rownames(countdata)),])
+countdata.sorted <- as.data.frame(countdata[order(rownames(countdata)),])
 ```
+
 ```{r gene data}
 #gene_annotation <- read.delim(file = "./data/genome_annotations.tab", header = T) %>% arrange(ID)
 
@@ -194,9 +166,8 @@ gene_annotation <- as.data.frame(gene_annotation[order(rownames(gene_annotation)
 all(rownames(countdata.sorted) == gene_annotation$Gene.model)
 all(rownames(countdata.sorted) ==  rownames(gene_annotation))
 
-# Obtain KOG annotations for P. damicornis genome
-gene2kog <- gene_annotation %>% select(Gene.model, KOG_Class) %>% filter(KOG_Class != "")
-View(gene_annotation)
+# Obtain KOG annotations for Cladocopium genome
+# gene2kog <- gene_annotation %>% select(Gene.model, KOG_Class) %>% filter(KOG_Class != "")
 ```
 ```{r coldata}
 # Get sample data into tibble
@@ -256,8 +227,9 @@ vsd <- vst(dds, blind = TRUE)
 ```{r}
 PCA <- ggPCA(vsd, samples, condcolors_AxH, pclab = c(1,2))
 PCA
-ggsave(PCA, filename = "../outputs/charts/PCA.png", width = 170, height = 100, units = "mm", device = "png")
+ggsave(PCA, filename = "./outputs/charts/PCA.png", width = 170, height = 100, units = "mm", device = "png")
 ```
+
 ### Principal Coordinate Analysis (PCoA)
 ```{r mds, eval = TRUE}
 ## Calculate distances among samples
@@ -294,7 +266,7 @@ pcoa1 <- ggplot(mds_col, aes(fill = Treatment)) +
   #theme_custom() +
   guides(fill = guide_legend(override.aes = list(fill = condcolors_AxH, shape = 21, alpha = 1, stroke = 0.5))) +
   theme(legend.spacing.y = unit(0, "cm")) 
-pcoa1title <- expression(paste("PCoA of overall ", italic("Cladocopium"), " spp. gene expression"))
+pcoa1title <- expression(paste("PCoA of overall ", italic("Pocillopora"), " spp. gene expression"))
 pcoa1 <- pcoa1 + ggtitle(pcoa1title, subtitle = "Plotted with colony centroids")
 pcoa1
 ggsave(pcoa1, filename = "../outputs/charts/pcoa_colony.png", width = 150, height = 150, units = "mm", device = "png")
@@ -435,30 +407,6 @@ DE %>%
   mutate(file_out = paste0(num, "_", den, "_", Colony, "_", "all", ".csv"),
          file_out_path = file.path("../outputs/DESeq-results/tables/all/", file_out),
          data = walk2(df, file_out_path, write_csv))
-
-# Select top 10 DEGs for all sig controlled antibiotics 
-
-allanti <- read_csv("../outputs/DESeq-results/tables/sig/Antibiotics_control_all_sig.csv")
-sortedanti <- allanti[order(allanti$padj),]
-top10anti <- sortedanti[1:10,]
-top10antiwithdescriptions <- sortedanti[1:12,]
-View(top10antiwithdescriptions)
-
-# Select top 10 DEGs for all sig controlled antibiotics.heat 
-
-allanti.heat <- read_csv("../outputs/DESeq-results/tables/sig/Antibiotics.Heat_control_all_sig.csv")
-sortedanti.heat <- allanti.heat[order(allanti.heat$padj),]
-top10anti.heat <- sortedanti.heat[1:10,]
-View(top10anti.heat)
-
-# Select top 10 DEGs for all sig controlled heat 
-
-allheat <- read_csv("../outputs/DESeq-results/tables/sig/Heat_control_all_sig.csv")
-sortedheat <- allheat[order(allheat$padj),]
-top10heat <- sortedheat[1:10,]
-View(top10heat)
-
-
 ```
 Why are there only 14 differentially expressed genes between the heat and control samples? --> Missing samples...low counts...interaction effect? 
 
@@ -555,7 +503,9 @@ grid.draw(OverVenn)
 ```
 
 ```{r treatent_eulerr}
-axh_list <- c(279, 54, 6775, 8, 605, 590, 126)
+# axh_list <- c(279, 54, 6775, 8, 605, 590, 126) 
+# Need to adjust for Symbiont gene sets
+
 names(axh_list) <- c("H", "A", "X", "H&A", "H&X", "A&X", "H&A&X")
 fit <- euler(axh_list, shape = "ellipse")
 treatment_euler <- plot(fit,
@@ -635,14 +585,14 @@ mat_genes <- mat_genes - rowMeans(mat_genes)
 ### Gene counts boxplots
 ```{r}
 for (i in 1:10) {
-  genoboxplot(DE$sig[[5]]$ID[i])
+  genoboxplot(DE$sig[[5]]$Gene.model[i])
 }
 ```
 
 
 
 ### Double-treatment plots
-
+## Adjust paths for analysis
 ## DESeq Gene Ontology (GO) enrichment analysis
 ### Heat vs. control 
 ```{r heat signed logP}
@@ -651,7 +601,7 @@ DE %>%
   filter(Colony == "all", num == "Heat", den == "control") %>%
   unnest(logP) %>%
   select(gene, logP) %>%
-  write.table(., file = "../R/GO_MWU/heat.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
+  write.table(., file = "./R/GO_MWU/heat.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
 ```
 ```{r heat GO_MWU}
 # Run GO_MWU for Heat vs. control for Biological Process (BP) GO terms
@@ -1026,7 +976,7 @@ dp1
 summary(dp1)
 # dp1$tab
 dpvarc <- as.data.frame(dp1$var.contr) %>%
-  rownames_to_column("ID") %>% left_join(gene_annotation, by = "ID") %>%
+  rownames_to_column("Gene.model") %>% left_join(gene_annotation, by = "Gene.model") %>%
   arrange(desc(LD1))
 ```
 ```{r dapc_loadingplot}
@@ -1052,7 +1002,7 @@ load_ld1_barplot <- HeatmapAnnotation("DAPC LD1 loading" = anno_barplot(dpvarc_l
 #----------------------------NOT WORKING
 
 # create heatmap
-pdf("~/Desktop/DAPC_LD1_10genes_heatmap_clustered.pdf", height = 9, width = 11)
+pdf("../outputs/charts/DAPC_LD1_10genes_heatmap_clustered.pdf", height = 8.5, width = 11)
 heatmapLD1 <- Heatmap(mat_ld1,
         #row_order = rownames(mat_ld1),
         col = col_fun_ge(mat_ld1),
@@ -1073,9 +1023,9 @@ heatmapLD1 <- Heatmap(mat_ld1,
 draw(heatmapLD1, heatmap_legend_side = "left", legend_title_gp = gpar(fontsize = 10, fontface = "plain"), padding = unit(c(0.5, -2.0, 0.5, 0.5), "in"))
 ```
 ```{r dapc_boxplots_ld1}
-pdf("~/Desktop/DAPC_LD1_loadings_10genes_boxplots.pdf", height = 3.5, width = 5)
+#pdf("../outputs/charts/DAPC_LD1_loadings_10genes_boxplots.pdf", height = 3.5, width = 5)
 for (i in 1:10) {
-  genoboxplot(dpvarc_ld1$ID[i])
+  genoboxplot(dpvarc_ld1$Gene.model[i])
 }
 ```
 ```{r dapc_heatmaps_ld2}
@@ -1091,7 +1041,7 @@ load_ld2_barplot <- HeatmapAnnotation("DAPC LD2 loading" = anno_barplot(dpvarc_l
 
 #----------------------------NOT WORKING
 
-pdf("~/Desktop/DAPC_LD2_10genes_heatmap_clustered.pdf", height = 9, width = 11)
+#pdf("../outputs/charts/DAPC_LD2_10genes_heatmap_clustered.pdf", height = 8.5, width = 11)
 heatmapLD2 <- Heatmap(mat_ld2,
         #row_order = rownames(mat_ld2),
         col = col_fun_ge(mat_ld2),
@@ -1114,7 +1064,7 @@ draw(heatmapLD2, heatmap_legend_side = "left", legend_title_gp = gpar(fontsize =
 ```{r dapc_boxplots_ld2}
 #pdf("../outputs/charts/DAPC_LD2_loadings_10genes_boxplots.pdf", height = 3.5, width = 5)
 for (i in 1:10) {
-  genoboxplot(dpvarc_ld2$ID[i])
+  genoboxplot(dpvarc_ld2$Gene.model[i])
 }
 ```
 ```{r, include = FALSE, eval = FALSE}
@@ -1176,7 +1126,7 @@ dpvarc %>% ggplot(., aes(x = LD1, y = LD2)) +
   geom_text_repel(data = dpvarc_ld2[1:10, ], aes(label = (dpvarc_ld2[1:10, 5])), color = "black", size = 2.5, box.padding = unit(0.35, "lines")) + ggtitle("DAPC LD gene loadings scatterplot", subtitle = "Top 10 genes LD2 labelled")
 ```
 
-## (DONE) Weighted gene co-expression network analysis (WGCNA)
+## Weighted gene co-expression network analysis (WGCNA) (DONE)
 ```{r wgcna_setup_datExpr}
 allowWGCNAThreads(nThreads = 4)
 # obtain vst-transformed counts
@@ -1193,7 +1143,6 @@ sft$powerEstimate
 ### Blockwise network
 ```{r WGCNA_network}
 ## Create weighted gene co-expression network
-Sys.setenv('R_MAX_VSIZE'=320000000000)
 net <- blockwiseModules(
   # Input data
   datExpr,
@@ -1212,9 +1161,9 @@ net <- blockwiseModules(
   # Basic tree cut options
   deepSplit = 2, # 2
   detectCutHeight = 0.99, # 0.99
-  minModuleSize = min(50, ncol(datExpr)/5 ), # 50 minimum, One-fifth of all genes in expression matrix (4487) maximum
+  minModuleSize = min(100, ncol(datExpr)/5 ), # 50 minimum, One-fifth of all genes in expression matrix (4487) maximum
   # Module merging options
-  mergeCutHeight = 0.25, # 0.3
+  mergeCutHeight = 0.25, # 0.25 for symbiont analysis
   # Gene reassignment, module trimming, and module "significance" criteria
   # Output options
   numericLabels=T, 
@@ -1257,11 +1206,6 @@ MEs <- orderMEs(MEs, greyLast = TRUE)
 
 ```{r MEs_colors}
 # Recalculate ME with color labels
-View(datExpr)
-View(countdata_vst)
-View(netColors)
-ncol(datExpr)
-length(netColors)
 netMEs <- moduleEigengenes(expr = datExpr, colors = netColors, softPower = sft$powerEstimate)$eigengenes
 ```
 ```{r dendrogram}
@@ -1291,7 +1235,7 @@ plot(geneTree, labels = FALSE, xlab="", sub="", main = "Gene clustering on TOM-b
 ```
 ```{r dynamic_treecut}
 # Prefer large modules, so set the minimum module size relatively high:
-minModuleSize <- min(25, ncol(datExpr)/5 )
+minModuleSize <- min(100, ncol(datExpr)/5 )
 # Module identification using dynamic tree cut:
 dynamicMods <- cutreeDynamic(dendro = geneTree,
                              distM = dissTOM,
@@ -1320,7 +1264,7 @@ abline(h=MEDissThres, col = "red")
 ```
 ```{r merge_modules}
 # Call an automatic merging function
-mergedMods <- mergeCloseModules(datExpr, dynamicColors, cutHeight = 0.1, verbose = 5)
+mergedMods <- mergeCloseModules(datExpr, dynamicColors, cutHeight = 0.3, verbose = 5)
 # The merged module colors
 mergedColors <- mergedMods$colors
 table(mergedColors)
@@ -1505,9 +1449,8 @@ View(uniqModules)
 
 for (module in uniqModules){
 #modkME <- genecolors_kME %>% select(., "gene", "moduleColor", paste("kME", module, sep = ""))
-  modkME <- genecolors_kME %>% select(., "gene", "moduleColor", paste(module, sep = ""))
-}
-
+#modkME <- genecolors_kME %>% 
+modkME <- select(genecolors_kME, "gene", "moduleColor", paste("kME", module, sep = ""))
 View(modkME)
 
 colnames(modkME) <- c("gene", "moduleColor", "kME")
@@ -1520,7 +1463,7 @@ modkME <- modkME %>% select(., -moduleColor)
 #write.csv(modkME, file = paste("./outputs/WGCNA-results/tables/", module,"_kme.csv",sep=""), quote=F, row.names=F)
 write.csv(modkME, file = paste("../R/GO_MWU/", module,"_kme.txt",sep=""), quote=F, row.names=F)
 #repeat for each module
-#}
+}
 ```
 ```{r module_GO_MWU}
 # Run GO_MWU for salmon module for Biological Process (BP) GO terms
@@ -1566,9 +1509,7 @@ fig <- as.character(paste("GO_MWU_", module, ".pdf", sep = ""))
 levs <- c(0.05, 1e-10, 1e-15)
 ###
 commandArgs <- function(...) c(tab, "BP", fig, module, 0.001, 1e-5, 1e-15, 1.0)
-commandArgs
-source("./GO_MWU_WGCNA_plot.R")
-# previously Mike's: source("./R/GO_MWU/GO_MWU_WGCNA_plot.R")
+source("./R/GO_MWU/GO_MWU_WGCNA_plot.R")
 #}
 ```
 ```{r modules_GO}
@@ -1587,8 +1528,8 @@ modules.GO <- as.list(
     orangered4 = "../R/GO_MWU/MWU_BP_orangered4_kme.txt")
   ) %>% map(read.table, header = T) %>%
   bind_rows(.id = "module") %>%
-  as_tibble() %>% 
-  filter(p.adj < 0.05) 
+  as_tibble() %>%
+  filter(p.adj < 0.05)
 
 modules.GO %>%
   select(module, delta.rank, p.adj, name, nseqs, level, term) %>%
@@ -1768,7 +1709,7 @@ geneTraitSignificance <- as.data.frame(cor(datExpr, datTraits$control, use = "p"
 ```{r}
 GS <- as.numeric(cor(datExpr, datTraits$Antibiotics.Heat, use = "p"))
   GScolor <- numbers2colors(GS, signed = T)
-  numberOfColumn <- substring(colnames(datKME[2:22]), 4) # datkME not found
+  numberOfColumn <- substring(colnames(datKME[2:22]), 4)
 ```
 ```{r}
  for (module in uniqModules) {
@@ -1810,7 +1751,7 @@ g <- hikME %>% ggplot(., aes(GS, kME)) + geom_point(color = module) +
   xlim(-0.5, 1) +
   ylim(-0,1.0) +
   theme_bw() +
-  geom_text_repel(data = hikME[1:10, ], aes(label = hikME[1:10, ]$Description.s..of.hit.s.), color = "black", size = 2.5, box.padding = unit(0.35, "lines"))
+  geom_text_repel(data = hikME[1:10, ], aes(label = hikME[1:10, ]$Gene_Info), color = "black", size = 2.5, box.padding = unit(0.35, "lines"))
 print (g)
 }
 dev.off()
@@ -2140,7 +2081,6 @@ NET <- NET %>%
          datExpr = map(.x = data, ~ pivot_wider(select(., SampleID, gene, count), names_from = SampleID, values_from = count)),
          datExpr = map(.x = datExpr, ~ t(column_to_rownames(., "gene")))
          )
-View(NET)
 ```
 ```{r}
 # Find correlation power R^N that satisfies scale free critereon (SFT.R.sq>0.9) for each colony
