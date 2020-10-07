@@ -30,3 +30,6 @@ data/refs/
 data/genome
 data/symtypes
 R/GO_MWU
+data/cladocopium_annotations/
+data/SymbC1.Gene_Models.Annotation.csv
+R/GO_MWU/

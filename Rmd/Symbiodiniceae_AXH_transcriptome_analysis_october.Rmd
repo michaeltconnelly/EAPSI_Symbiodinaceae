@@ -13,12 +13,11 @@ knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRU
 knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Symbiodinaceae/")
 options(stringsAsFactors = FALSE)
 ```
-## (DONE) Setup packages and working directories
+## Setup packages and working directories (DONE)
 Include all packages needed for the entire transcriptome analysis and downstream visualizations
 ```{r packages, message=FALSE, include=FALSE}
-#essential analysis packages
 library("tidyverse")
-library("dplyr")
+# Essential RNAseq analysis packages
 library("DESeq2")
 library("apeglm")
 library("variancePartition")
@@ -28,15 +27,15 @@ library("adegenet")
 library("WGCNA")
 library("dynamicTreeCut")
 library("flashClust")
-#GO/KOG enrichment packages
+# GO/KOG enrichment packages
 library("KOGMWU")
 source("./R/GO_MWU/gomwu.functions.R")
-source("./R/AXH_functions.R")
-#data visualization packages
+# Data visualization packages
 library("pheatmap")
 library("ComplexHeatmap")
 library("VennDiagram")
 library("eulerr")
+# Graphics packages
 library("cowplot")
 library("patchwork")
 library("gridExtra")
@@ -50,6 +49,8 @@ library("circlize")
 library("stringr")
 library("extrafont")
 library("extrafontdb")
+# extended visualization functions for symbiont analysis
+source("./R/AXH_functions_C1.R")
 ```
 ```{r colors}
 # Set overall colors and shapes for ggplot2
@@ -134,9 +135,9 @@ theme_set(theme_mec())
 
 ## (DONE) Import sample metadata, counts data, and gene annotation
 ```{r, echo=TRUE}
-stable_samples <- read.table("./data/EAPSI_samples_AxH.txt", header = TRUE)
-#stable_samples$treatment <- as.factor(stable_samples$treatment)
-#stable_samples$genotype <- as.factor(stable_samples$genotype)
+samples <- read.table("./data/EAPSI_samples_AxH_meta.txt", header = TRUE)
+samples$SampleID <- gsub('-','.', samples$SampleID)
+# Import and tidy counts data
 countdata <- read.delim("./outputs/SymC1_counts/AxH_SymC1.counts", comment.char="#")
 ## Tidy counts data
 #Set Gene ID's as row names
@@ -146,29 +147,32 @@ countdata <- countdata[ ,7:ncol(countdata)]
 #countdata <- countdata[ ,6:ncol(countdata)]
 # Remove file prefixes and suffixes
   colnames(countdata) <- gsub("X.", "", colnames(countdata))
-  colnames(countdata) <- gsub("scratch.projects.transcriptomics.mikeconnelly.projects.EAPSI_Symbiodinaceae_AxH.outputs.STARalign_SymC1.", "", colnames(countdata))
+  colnames(countdata) <- gsub("scratch.projects.transcriptomics.mikeconnelly.projects.EAPSI_Symbiodinaceae.outputs.STARalign_SymC1.", "", colnames(countdata))
   colnames(countdata) <- gsub("_SymC1Aligned.out.bam$", "", colnames(countdata))
-# Sort countdata by P. damicornis gene ID
+  colnames(countdata) <- gsub("_SymC1_[1-4]Aligned.out.bam$", "", colnames(countdata)) # removes extra suffixes from multiple rounds of alignment and quantification
+# Sort countdata by Cladocopium goreaui gene ID
 countdata.sorted <- as.data.frame(countdata[order(rownames(countdata)),])
 ```
 
 ```{r gene data}
+# Need to redo genome annotation to incorporate GO and KOG annotations from egg-NOG-mapper
 #gene_annotation <- read.delim(file = "./data/genome_annotations.tab", header = T) %>% arrange(ID)
 
 #gene_annotation <- read.csv("~/Desktop/SymbC1.Gene_Models.Annotation.csv")
-gene_annotation <- read.csv("./data/genome/SymbC1.Gene_Models.Annotation.csv")
-# gene_annotation <- read.delim(file = "./data/pdam_genome_annotations.tab", header = T) %>% arrange(ID)
+gene_annotation <- read.csv("./data/SymbC1.Gene_Models.Annotation.csv", header = T) %>%
+  rename(Gene.model = "ID") %>% 
+  arrange(ID)
+# 
 rownames(gene_annotation) <- gene_annotation$Gene.model
-gene_annotation <- as.data.frame(gene_annotation[order(rownames(gene_annotation)),])
-
 
 # Check gene feature annotation and countdata rowname order coherence
 all(rownames(countdata.sorted) == gene_annotation$Gene.model)
-all(rownames(countdata.sorted) ==  rownames(gene_annotation))
+all(rownames(countdata.sorted) == rownames(gene_annotation))
 
-# Obtain KOG annotations for Cladocopium genome
+# Obtain KOG annotations for Cladocopium goreaui genome
 # gene2kog <- gene_annotation %>% select(Gene.model, KOG_Class) %>% filter(KOG_Class != "")
 ```
+
 ```{r coldata}
 # Get sample data into tibble
 coldata <- samples %>%
@@ -185,6 +189,8 @@ colcounts <- countdata.sorted %>%
   as_tibble(.) %>%
   gather(key = "SampleID", value = "count", -gene)
 ```
+## Begin gene expression analyses that correspond to the host analysis
+
 ```{r heatmap_annotation}
 ### ComplexHeatmap colors
 col_fun_ge <- function(mat) {
@@ -201,7 +207,7 @@ sample_annotation <- HeatmapAnnotation(Colony = samples$Colony,
 treatment_annotation <- HeatmapAnnotation(Treatment = c("control", "Heat", "Antibiotics", "Antibiotics.Heat"),
                                           col = anno_colors[2])
 ```
-## (DONE) Create DESeqDataSet
+## Create DESeqDataSet (DONE)
 ```{r create_dds}
 # Create full DESeqDataSet
 countData = countdata.sorted
@@ -225,9 +231,8 @@ dds <- dds[ rowSums(counts(dds)) > 10, ]
 vsd <- vst(dds, blind = TRUE)
 ```
 ```{r}
-PCA <- ggPCA(vsd, samples, condcolors_AxH, pclab = c(1,2))
-PCA
-ggsave(PCA, filename = "./outputs/charts/PCA.png", width = 170, height = 100, units = "mm", device = "png")
+ggPCA(vsd, samples, condcolors_AxH, pclab = c(1,2))
+
 ```
 
 ### Principal Coordinate Analysis (PCoA)
@@ -1140,85 +1145,43 @@ dim(datExpr)
 sft <- pickSoftThreshold(datExpr, verbose=5)
 sft$powerEstimate
 ```
-### Blockwise network
-```{r WGCNA_network}
-## Create weighted gene co-expression network
-net <- blockwiseModules(
-  # Input data
-  datExpr,
-  weights = NULL, 
-  # Options for splitting data into blocks
-  maxBlockSize = 27000,
-  # Network construction arguments:  correlation, adjacency function,  and topological overlap map options
-  corType = "bicor",
-  maxPOutliers = 0.1,
-  power=sft$powerEstimate, # 10
-  networkType = "signed", # signed
-  TOMType = "signed", # signed
-  saveTOMs = TRUE, 
-  saveTOMFileBase = "~/Desktop",
-  # saveTOMFileBase = "./outputs/WGCNA-results/AxH_TOM",
-  # Basic tree cut options
-  deepSplit = 2, # 2
-  detectCutHeight = 0.99, # 0.99
-  minModuleSize = min(100, ncol(datExpr)/5 ), # 50 minimum, One-fifth of all genes in expression matrix (4487) maximum
-  # Module merging options
-  mergeCutHeight = 0.25, # 0.25 for symbiont analysis
-  # Gene reassignment, module trimming, and module "significance" criteria
-  # Output options
-  numericLabels=T, 
-  # Options controlling behaviour
-  nThreads = 4,
-  checkMissingData = TRUE,
-  verbose = 5)
+```{r sft_qc}
+# This follows the tutorial: 
+# https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/FemaleLiver-02-networkConstr-man.pdf - reference step 2b for info on choosing the soft-thresholding power
+# Choose a set of soft-thresholding powers
+powers = c(c(1:10), seq(from = 12, to=20, by=2))
+# Plot the results:
+sizeGrWindow(9, 5)
+par(mfrow = c(1,2));
+cex1 = 0.9;
+# Scale-free topology fit index as a function of the soft-thresholding power
+plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",type="n",
+main = paste("Scale independence"));
+text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+labels=powers,cex=cex1,col="red");
+# this line corresponds to using an R^2 cut-off of h
+abline(h=0.90,col="red")
+# Mean connectivity as a function of the soft-thresholding power
+plot(sft$fitIndices[,1], sft$fitIndices[,5],
+xlab="Soft Threshold (power)",ylab="Mean Connectivity", type="n",
+main = paste("Mean connectivity"))
+text(sft$fitIndices[,1], sft$fitIndices[,5], labels=powers, cex=cex1,col="red")
 ```
 
-Should I filter genes for expression even more strictly before WGCNA? 
-Which criteria should I use? Differential expression (developers say don't do this!), higher expression?
-
-I can settle on a correlation, then toggle the module selection criteria afterwords. I would like to show many different module colors under the dendrogram, as is done in the WGCNA tutorials.
-
-I have chosen the above network construction parameters for the following reasons:
-
-First, following the recommendations of the WGCNA developers (https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/faq.html), a signed network was chosen to be able to detect positive and negative gene correlations, and the biweight midcorrelation was used since it is more robust to outliers. The option maxPOutliers = 0.1 was set based on the recommendation of the WGCNA developers. 
-
-The option deepSplit = 2
-detectCutHeight = 0.99
-
-minModuleSize = 100 because I prefer large modules that lend themselves to enrichment tests with GO_MWU for easier interpretation.
-
-*I need to see how small modules perform in GO_MWU...* not well!
-
-mergeCutHeight = 0.3 because I want to group together modules 
-
-
-```{r network_MEs}
-# Inspect network results
-table(net$colors)
-# Convert labels to standard WGCNA colors for plotting
-netColors <- labels2colors(net$colors, colorSeq = standardColors())
-colorstable <- as.data.frame(table(netColors))
-# Save module assignment and eigengene information for subsequent analysis
-moduleLabels <- net$colors
-MEs <- net$MEs
-MEs <- orderMEs(MEs, greyLast = TRUE)
-```
-
-```{r MEs_colors}
-# Recalculate ME with color labels
-netMEs <- moduleEigengenes(expr = datExpr, colors = netColors, softPower = sft$powerEstimate)$eigengenes
-```
-```{r dendrogram}
-geneTree <- net$dendrograms[[1]]
-plot(geneTree, labels = FALSE, xlab="", sub="", main = "Gene clustering on TOM-based dissimilarity")
-```
-### Step-by-step network
-Following the tutorial as in: https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/FemaleLiver-02-networkConstr-man.pdf
+### Step-by-step network construction
 ```{r adjacency_TOM}
+# This follows the tutorial: 
+# https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/Tutorials/FemaleLiver-02-networkConstr-man.pdf
+# 
+# I have chosen the following network construction parameters for the following reasons:
+# First, following the recommendations of the WGCNA developers (https://horvath.genetics.ucla.edu/html/CoexpressionNetwork/Rpackages/WGCNA/faq.html), a signed network was chosen to be able to detect positive and negative gene correlations, and the biweight midcorrelation was used since it is more robust to outliers. 
+
 adjacency <- adjacency(datExpr,
       # Network construction arguments:  correlation, adjacency function,  and topological overlap map options
                        corFnc = "bicor", # bimidweight correlation
-                       power=sft$powerEstimate, # 10
+                       # power = sft$powerEstimate, # 10
+                       power = 4,
                        type = "signed") # signed
 # 
 TOM <- TOMsimilarity(adjacency,
@@ -1226,17 +1189,16 @@ TOM <- TOMsimilarity(adjacency,
                      verbose = 5)
 dissTOM <- 1-TOM
 # 
-rm(adjacency)
+rm(adjacency) # may need to delete adjacency, TOM to clear up vector memory
 ```
 ```{r gene_dendrogram}
-# may need to delete adjacency, TOM to clear up vector memory
 geneTree <- flashClust(as.dist(dissTOM), method = "average")
 plot(geneTree, labels = FALSE, xlab="", sub="", main = "Gene clustering on TOM-based dissimilarity")
 ```
 ```{r dynamic_treecut}
-# Prefer large modules, so set the minimum module size relatively high:
+# minModuleSize = 100 because I prefer large modules that lend themselves to enrichment tests with GO_MWU for easier interpretation.
 minModuleSize <- min(100, ncol(datExpr)/5 )
-# Module identification using dynamic tree cut:
+# Module identification using dynamic tree cut, with cutHeight = 0.99 and deepSplit = 2 based on the recommendations of the WGCNA developers
 dynamicMods <- cutreeDynamic(dendro = geneTree,
                              distM = dissTOM,
                              cutHeight = 0.99,
@@ -1254,7 +1216,7 @@ MEs <- MEList$eigengenes
 # Calculate dissimilarity of module eigengenes
 MEDiss <- 1-cor(MEs);
 # Cluster module eigengenes
-METree <- hclust(as.dist(MEDiss), method = "average");
+METree <- flashClust(as.dist(MEDiss), method = "average");
 # Plot the result
 plot(METree, main = "Clustering of module eigengenes",
 xlab = "", sub = "")
@@ -1264,13 +1226,15 @@ abline(h=MEDissThres, col = "red")
 ```
 ```{r merge_modules}
 # Call an automatic merging function
+# merge cutHeight = 0.3 because I want to group together modules with >70% similar module eigengene expression
 mergedMods <- mergeCloseModules(datExpr, dynamicColors, cutHeight = 0.3, verbose = 5)
 # The merged module colors
 mergedColors <- mergedMods$colors
 table(mergedColors)
 ```
 ```{r dendrogram_modules}
-pdf(file = "../outputs/WGCNA-results/dendrogram.pdf", width = 8, height = 6)
+pdf(file = "./outputs/WGCNA-results/cladocopium_dendrogram.pdf", width = 8, height = 6)
+# pdf(file = "./manuscript_figures/FigS##_WGCNA_cladocopium_dendrogram.pdf", width = 8, height = 6)
 # Plot the dendrogram and the module colors underneath
 plotDendroAndColors(dendro = geneTree, 
                     colors = cbind(dynamicColors, mergedColors),
@@ -1303,11 +1267,10 @@ plot(hclustME, main="Clustering tree based on the module eigengenes")
 ### Module eigengene correlations
 ```{r trait_data}
 # Get sample data into tibble
-samplesmeta <- read.table("../data/EAPSI_samples_AxH_meta.txt", header = TRUE)
-datTraits <- samplesmeta %>% 
-  select(-Reef, -Colony, -Environment, -Treatment, -Batch, -allanti, -allheat, -Houwan, -Wanglitung) %>%
-  select(SampleID, control, Heat, Antibiotics, Antibiotics.Heat) %>%
-  #select(SampleID, HW1, HW2, WT1, WT2) %>%
+datTraits <- samples %>% 
+  dplyr::select(-Reef, -Colony, -Environment, -Treatment, -Batch, -allanti, -allheat, -Houwan, -Wanglitung) %>%
+  dplyr::select(SampleID, control, Heat, Antibiotics, Antibiotics.Heat) %>%
+  #dplyr::select(SampleID, HW1, HW2, WT1, WT2) %>%
   arrange(SampleID) %>% #Order rows by sample name                         
   column_to_rownames(var = "SampleID")
 #Define numbers of genes and samples
@@ -1376,7 +1339,7 @@ module_barplot <- HeatmapAnnotation(module_size = anno_barplot(moddf$module_size
                                     )
 ```
 ```{r ME_heatmap_ComplexHeatmap}
-pdf(file = "../outputs/WGCNA-results/figures/ME_complexheatmap_treatments.pdf", width = 6.5, height = 6)
+pdf(file = "./outputs/WGCNA-results/ME_complexheatmap_treatments_cladocopium.pdf", width = 6.5, height = 6)
 #pdf(file = "./manuscript_figures/Fig4A_ME_heatmap.pdf", width = 6, height = 6)
 me_heatmap <- Heatmap(moduleTraitCor,
                       #col = col_fun_cor,
@@ -1408,14 +1371,60 @@ draw(me_heatmap, column_title = "Module eigengene treatment correlation heatmap"
      show_annotation_legend = FALSE, heatmap_legend_side = "left"
      )
 ```
-I would also like to...
-...add treatment color annotation to top of heatmap...and fix legend label position (modules, Treatment, module_size)
-...adjust legend position...
-...add heatmap to show module eigengene correlations to bacteria taxa...
-...include text cloud annotation based on GO enrichment...
+### Module genes and hub genes
+```{r modules_genes}
+# Generate GeneIDs
+Genes <- colnames(datExpr)
+# Output genes and annotations for each module
+for (module in uniqModules)
+{
+# Select module genes
+inModule <- (moduleColors == module)
+# Get gene IDs
+modGeneIDs <- Genes[inModule] #this is the correct set of gene IDs!
+# Write gene annotations into a file
+fileName = paste("./outputs/WGCNA-results/notes/", module, ".csv", sep="");
+module_annotation <- gene_annotation[modGeneIDs, ]
+write_csv(module_annotation, path = fileName)
+}
+```
+```{r hub_genes}
+hubs <- chooseTopHubInEachModule(datExpr,
+                         mergedColors,
+                         corFnc = "bicor", # bimidweight correlation
+                         # power=sft$powerEstimate, # 10
+                         power = 4,
+                         type = "signed")
+hub_genes <- gene_annotation[hubs, ]
+hub_genes$module <- names(hubs)
+row.names(hub_genes) <- NULL
+hub_genes <- hub_genes %>% dplyr::select(module, everything())
+write_csv(hub_genes, path = "./outputs/WGCNA-results/hub_genes.csv")
+```
 
-
-
+```{r datkME}
+#this section is adapted from Rachel Wright's GitHub: https://github.com/rachelwright8/Ahya-White-Syndromes/
+colnames(MEs1) <- MEmodule_colors
+datKME <- signedKME(datExpr, MEs1, outputColumnName = "") %>% rownames_to_column(., "ID")
+genecolors <- data.frame(ID = Genes, moduleColor = moduleColors)
+genecolors_kME <- left_join(genecolors, datKME, by = "ID") 
+###
+```
+```{r kME_files}
+# Assemble input for WGCNA GO_MWU: dataframe with gene IDs and kME values for all genes within a module, 0 for all genes without
+for (module in uniqModules){
+modkME <- genecolors_kME %>% dplyr::select(., "ID", "moduleColor", module) #paste("kME", module, sep = ""))
+colnames(modkME) <- c("gene", "moduleColor", "kME")
+###
+modkME$kME[modkME$moduleColor!=module] <- 0  #also need to change column names for color you pick above
+#modkME$kME[modkME$moduleColor==module] <- 1 #leave commented out to keep kME values
+modkME <- modkME %>% select(., -moduleColor)
+# write csv
+#write.csv(modkME, file = paste("./outputs/WGCNA-results/tables/", module,"_kme.csv",sep=""), quote=F, row.names=F)
+write.csv(modkME, file = paste("./R/GO_MWU/", module,"_kme.txt",sep=""), quote=F, row.names=F)
+#repeat for each module
+}
+```
 
 ## WGCNA Gene Ontology (GO) enrichment analysis
 ```{r modules_genes}
@@ -1698,7 +1707,38 @@ pdf("../outputs/WGCNA-results/modules_correlations_KOGenrichment_heatmap.pdf", h
 combmap <- me_heatmap + kog_heatmap2
 draw(combmap,  show_annotation_legend = FALSE, heatmap_legend_side = "left")
 ```
+### Module trait gene significance (GS) versus interconnectivity (kME) scatterplots, scaled gene profile plots and edge files
+```{r genesig}
+# calculate gene trait significance for each treatment, genotype, etc.
+geneTraitSignificance <- as.data.frame(cor(datExpr, datTraits, use = "p")) 
+traitGS <- geneTraitSignificance %>% 
+  rownames_to_column("ID")
+```
+```{r df_kME_GS}
+longKME <- datKME %>% 
+  # rename(gene = "ID") %>% 
+  pivot_longer(cols= -ID, names_to = "module", values_to = "kME")
 
+df_gene_GS_kME <- genecolors %>%
+  # rename(gene = "ID") %>% 
+  full_join(traitGS, by = "ID") %>% 
+  full_join(longKME, by = "ID") %>%
+  filter(moduleColor == module) %>%
+  dplyr::select(-module)
+```
+```{r module_GS_kME_results_tables}
+# write output tables with gene kME statistics and trait gene significance for each module
+ for (module in uniqModules) {
+# datKME <- datKME %>% column_to_rownames("gene")
+df_mod_GS_kME <- df_gene_GS_kME %>%
+  filter(moduleColor == module) %>% 
+  dplyr::select(-moduleColor) %>% 
+  dplyr::select(ID, kME, everything()) %>% 
+  arrange(desc(kME)) %>% 
+  left_join(., gene_annotation, by = "ID")
+write_csv(df_mod_GS_kME, path = paste("./outputs/WGCNA-results/tables/", module, "_GS_kME.csv", sep = ""))
+}
+```
 
 ## WGCNA module connectivity scatterplots, hubgenes, and edge files
 ```{r}
