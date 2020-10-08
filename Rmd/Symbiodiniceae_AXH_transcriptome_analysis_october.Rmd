@@ -9,8 +9,8 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
-# knitr::opts_knit$set(root.dir = "~/Documents/Research/EAPSI_Symbiodinaceae/")#Rmd/
-knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Symbiodinaceae/")
+knitr::opts_knit$set(root.dir = "~/Documents/Research/EAPSI_Symbiodinaceae/")#Rmd/
+# knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Symbiodinaceae/")
 options(stringsAsFactors = FALSE)
 ```
 ## (DONE) Setup packages and working directories
@@ -137,7 +137,7 @@ theme_set(theme_mec())
 stable_samples <- read.table("./data/EAPSI_samples_AxH.txt", header = TRUE)
 #stable_samples$treatment <- as.factor(stable_samples$treatment)
 #stable_samples$genotype <- as.factor(stable_samples$genotype)
-countdata <- read.delim("./outputs/SymC1_counts/AxH_SymC1.counts", comment.char="#")
+countdata <- read.csv("./outputs/SymC1_counts/AxH_SymC1.csv", comment.char="#")
 ## Tidy counts data
 #Set Gene ID's as row names
 row.names(countdata) <- countdata$Geneid
@@ -269,7 +269,7 @@ pcoa1 <- ggplot(mds_col, aes(fill = Treatment)) +
 pcoa1title <- expression(paste("PCoA of overall ", italic("Pocillopora"), " spp. gene expression"))
 pcoa1 <- pcoa1 + ggtitle(pcoa1title, subtitle = "Plotted with colony centroids")
 pcoa1
-ggsave(pcoa1, filename = "../outputs/charts/pcoa_colony.png", width = 150, height = 150, units = "mm", device = "png")
+# ggsave(pcoa1, filename = "../outputs/charts/pcoa_colony.png", width = 150, height = 150, units = "mm", device = "png")
 ```
 ```{r treatment pcoa}
 # Calculate Treatment centroids for plotting
@@ -301,7 +301,7 @@ pcoa2 <- ggplot(mds_trmt, aes(fill = Treatment)) +
 #pcoa2title <- expression(paste("PCoA of ", italic("Pocillopora"), " coral gene expression"))
 #pcoa2 <- pcoa2 + ggtitle(pcoa2title, subtitle = "Plotted with treatment centroids")
 pcoa2
-ggsave(pcoa2, filename = "../outputs/charts/pcoa_treatment.png", width = 112, height = 80, units = "mm", device = "png")
+# ggsave(pcoa2, filename = "../outputs/charts/pcoa_treatment.png", width = 112, height = 80, units = "mm", device = "png")
 ```
 
 ### Variance partition
@@ -389,7 +389,7 @@ DEtab <- DE %>%
   select(Colony, num, den, `DEGs [up, down]`)
 
 DE_table <- DEtab %>% filter(den == "control") 
-write_csv(DE_table, "../outputs/DESeq-results/tables/DE_table.csv")
+write_csv(DE_table, "./outputs/DESeq-results/tables/DE_table.csv")
 ```
 The next chunk writes out the results tables as comma-separated files for all the differential expression results contrasts, with gene ID and annotation information for preparation as a supplemental table.
 Next, I want to bring together the overall and genotype model LFC and padj values for each treatment contrast into a single table.
@@ -399,13 +399,13 @@ Next, I want to bring together the overall and genotype model LFC and padj value
 DE %>%
   filter(den == "control") %>%
   mutate(sig_file_out = paste0(num, "_", den, "_", Colony, "_", "sig", ".csv"),
-         sig_file_out_path = file.path("../outputs/DESeq-results/tables/sig/", sig_file_out),
+         sig_file_out_path = file.path("./outputs/DESeq-results/tables/sig/", sig_file_out),
          data = walk2(sig, sig_file_out_path, write_csv))
 # Write ALL DEG results tables to csv files
 DE %>%
   filter(den == "control") %>%
   mutate(file_out = paste0(num, "_", den, "_", Colony, "_", "all", ".csv"),
-         file_out_path = file.path("../outputs/DESeq-results/tables/all/", file_out),
+         file_out_path = file.path("./outputs/DESeq-results/tables/all/", file_out),
          data = walk2(df, file_out_path, write_csv))
 ```
 Why are there only 14 differentially expressed genes between the heat and control samples? --> Missing samples...low counts...interaction effect? 
@@ -467,7 +467,7 @@ length(dplyr::setdiff(ressig_heat, ressig_anti.heat))
 length(dplyr::setdiff(ressig_anti, ressig_heat))
 ```
 ```{r treatment_venn}
-pdf(file = "../outputs/DESeq-results/figures/Venn_AXH.pdf", height = 4, width = 4) # Not working...
+pdf(file = "./outputs/DESeq-results/figures/Venn_AXH.pdf", height = 4, width = 4) # Not working...
 vp = viewport(height = unit(4, "in"),  width = unit(4, "in"))
 grid.newpage()
 grid.rect(vp = vp, gp = gpar(col = "white"))
@@ -517,7 +517,7 @@ treatment_euler <- plot(fit,
      legend = FALSE, 
      adjust_labels = TRUE)
 treatment_euler
-ggsave(plot = treatment_euler, filename = "../outputs/DESeq-results/figures/Euler_AXH.pdf", width = 80, height = 80, units = "mm", device = "pdf")
+ggsave(plot = treatment_euler, filename = "./outputs/DESeq-results/figures/Euler_AXH.pdf", width = 80, height = 80, units = "mm", device = "pdf")
 ```
 
 
@@ -586,7 +586,7 @@ mat_genes <- mat_genes - rowMeans(mat_genes)
 ```{r}
 for (i in 1:10) {
   genoboxplot(DE$sig[[5]]$Gene.model[i])
-}
+} 
 ```
 
 
@@ -605,51 +605,73 @@ DE %>%
 ```
 ```{r heat GO_MWU}
 # Run GO_MWU for Heat vs. control for Biological Process (BP) GO terms
-commandArgs <- function(...) c("MWU_BP_heat.control.logP.txt", "BP")
-#source("../R/GO_MWU/GO_MWU.R")
-source(knitr::purl("../R/GO_MWU/GO_MWU.R", quiet=TRUE))
+commandArgs <- function(...) c("heat.control.logP.txt", "BP")
+source("./R/GO_MWU/GO_MWU.R")
+#source(knitr::purl("../R/GO_MWU/GO_MWU.R", quiet=TRUE))
 
 # Run GO_MWU for Heat vs. control for Molecular Function GO terms
-commandArgs <- function(...) c("MWU_MF_heat.control.logP.txt", "MF")
-#source("../R/GO_MWU/GO_MWU.R")
-source(knitr::purl("../R/GO_MWU/GO_MWU.R", quiet=TRUE))
+commandArgs <- function(...) c("heat.control.logP.txt", "MF")
+source("./R/GO_MWU/GO_MWU.R")
+#source(knitr::purl("../R/GO_MWU/GO_MWU.R", quiet=TRUE))
 
 # Run GO_MWU for Heat vs. control for Cellular Component (CC) GO terms
-commandArgs <- function(...) c("MWU_CC_heat.control.logP.txt", "CC")
-#source("../R/GO_MWU/GO_MWU.R")
-source(knitr::purl("../R/GO_MWU/GO_MWU.R", quiet=TRUE))
+commandArgs <- function(...) c("heat.control.logP.txt", "CC")
+source("./R/GO_MWU/GO_MWU.R")
+#source(knitr::purl("../R/GO_MWU/GO_MWU.R", quiet=TRUE))
 ```
 ```{r heat.control_GO}
 
-x <- as.list(c("../R/GO_MWU/MWU/"))
+x <- as.list(c("./R/GO_MWU/MWU/"))
 
 class(read.table)
 
 
 heat.control.GO <- as.list(
-  c(BP = "../R/GO_MWU/MWU_BP_heat.control.logP.txt",
-    MF = "../R/GO_MWU/MWU_MF_heat.control.logP.txt",
-    CC = "../R/GO_MWU/MWU_CC_heat.control.logP.txt")
+  c(BP = "./R/GO_MWU/MWU_BP_heat.control.logP.txt",
+    MF = "./R/GO_MWU/MWU_MF_heat.control.logP.txt",
+    CC = "./R/GO_MWU/MWU_CC_heat.control.logP.txt")
   ) %>% map(read.table, header = T) %>%
   bind_rows(.id = "ontology") %>%
   as_tibble() %>%
   filter(p.adj < 0.01)
 
+#heat.control.GO <- as.list(
+#  c(BP = "./R/GO_MWU/MWU_BP_heat.control.logP.txt",
+#    MF = "./R/GO_MWU/MWU_MF_heat.control.logP.txt",
+#    CC = "./R/GO_MWU/MWU_CC_heat.control.logP.txt")
+#  ) %>% map(read.table, header = T) %>%
+#  bind_rows(.id = "ontology") %>%
+#  as_tibble() %>%
+#  filter(p.adj < 0.01)
+
 heat.control.GO %>%
   select(ontology, delta.rank, p.adj, name, nseqs, level, term) %>%
   arrange(ontology, p.adj) %>% 
-  write_csv(path = "../outputs/DESeq-results/GO_MWU/tables/heat.control.GO.csv")
+  write_csv(path = "./outputs/DESeq-results/GO_MWU/tables/heat.control.GO.csv")
 
-heat.control.GO %>% filter(p.adj < 0.01 & delta.rank >= 0) %>% count(ontology)
+heat.control.GO %>% filter(p.adj < 0.01 & delta.rank >= 0) 
+
+heat.control.GO
+
+# heat.control.GO %>% count(ontology)
+
+class(heat.control.GO)
+
+
+heat.control.GO$ontology
+
 ```
 ```{r heat GO_MWU plot}
 # Plot GO_MWU results for Heat vs. control 
 commandArgs <- function(...) c("heat.control.logP.txt", "BP", "GO_MWU.heat.control.pdf", 1e-6, 1e-8, 1e-10, 1.5)
-source("../R/GO_MWU/GO_MWU_plot.R")
+source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
+# source("./R/GO_MWU/GO_MWU_plot.R")
 commandArgs <- function(...) c("heat.control.logP.txt", "MF", "GO_MWU.heat.control_slim.pdf", 0.05, 0.01, 1e-3, 1)
-source("../R/GO_MWU/GO_MWU_plot.R")
+#source("./R/GO_MWU/GO_MWU_plot.R")
+source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
 commandArgs <- function(...) c("heat.control.logP.txt", "CC", "GO_MWU.heat.control_slim.pdf", 0.05, 0.01, 1e-3, 1)
-source("../R/GO_MWU/GO_MWU_plot.R")
+#source("./R/GO_MWU/GO_MWU_plot.R")
+source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
 ```
 ### Antibiotics vs. control 
 ```{r anti signed logP}
@@ -658,26 +680,26 @@ DE %>%
   filter(Colony == "all", num == "Antibiotics", den == "control") %>%
   unnest(logP) %>%
   select(gene, logP) %>%
-  write.table(., file = "../R/GO_MWU/anti.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
+  write.table(., file = "./R/GO_MWU/anti.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
 ```
 ```{r anti GO_MWU}
 # Run GO_MWU for Antibiotics vs. control for Biological Process (BP) GO terms
 commandArgs <- function(...) c("anti.control.logP.txt", "BP")
-source(knitr::purl("../R/GO_MWU/GO_MWU.R", quiet=TRUE))
+source("./R/GO_MWU/GO_MWU.R")
 
 # Run GO_MWU for Antibiotics vs. control for Molecular Function GO terms
 commandArgs <- function(...) c("anti.control.logP.txt", "MF")
-source(knitr::purl("../R/GO_MWU/GO_MWU.R", quiet=TRUE))
+source("./R/GO_MWU/GO_MWU.R")
 
 # Run GO_MWU for Antibiotics vs. control for Cellular Component (CC) GO terms
 commandArgs <- function(...) c("anti.control.logP.txt", "CC")
-source(knitr::purl("../R/GO_MWU/GO_MWU.R", quiet=TRUE))
+source("./R/GO_MWU/GO_MWU.R")
 ```
 ```{r anti.control_GO}
 anti.control.GO <- as.list(
-  c(BP = "../R/GO_MWU/MWU_BP_anti.control.logP.txt",
-    MF = "../R/GO_MWU/MWU_MF_anti.control.logP.txt",
-    CC = "../R/GO_MWU/MWU_CC_anti.control.logP.txt")
+  c(BP = "./R/GO_MWU/MWU_BP_anti.control.logP.txt",
+    MF = "./R/GO_MWU/MWU_MF_anti.control.logP.txt",
+    CC = "./R/GO_MWU/MWU_CC_anti.control.logP.txt")
   ) %>% map(read.table, header = T) %>%
   bind_rows(.id = "ontology") %>%
   as_tibble() %>%
@@ -686,18 +708,18 @@ anti.control.GO <- as.list(
 anti.control.GO %>%
   select(ontology, delta.rank, p.adj, name, nseqs, level, term) %>%
   arrange(ontology, p.adj) %>% 
-  write_csv(path = "../R/GO_MWU/tables/anti.control.GO.csv")
+  write_csv(path = "./R/GO_MWU/tables/anti.control.GO.csv")
 
 anti.control.GO %>% filter(p.adj < 0.01 & delta.rank >= 0) %>% count(ontology)
 ```
 ```{r anti GO_MWU plot}
 # Plot GO_MWU results for Antibiotics vs. control 
 commandArgs <- function(...) c("anti.control.logP.txt", "BP", "GO_MWU.anti.control.pdf", 1e-3, 1e-4, 1e-5, 1.5)
-source("../R/GO_MWU/GO_MWU_plot.R")
+source("./R/GO_MWU/GO_MWU_plot.R")
 commandArgs <- function(...) c("anti.control.logP.txt", "MF", "GO_MWU.anti.control_slim.pdf", 5e-2, 1e-2, 1e-3, 1.0)
-source("../R/GO_MWU/GO_MWU_plot.R")
+source("./R/GO_MWU/GO_MWU_plot.R")
 commandArgs <- function(...) c("anti.control.logP.txt", "CC", "GO_MWU.anti.control_slim.pdf", 5e-2, 1e-2, 1e-3, 1.0)
-source("../R/GO_MWU/GO_MWU_plot.R")
+source("./R/GO_MWU/GO_MWU_plot.R")
 ```
 ### Antibiotics.Heat vs. control 
 ```{r anti.heat signed logP}
@@ -706,26 +728,26 @@ DE %>%
   filter(Colony == "all", num == "Antibiotics.Heat", den == "control") %>%
   unnest(logP) %>%
   select(gene, logP) %>%
-  write.table(., file = "../R/GO_MWU/anti.heat.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
+  write.table(., file = "./R/GO_MWU/anti.heat.control.logP.txt", row.names = FALSE, quote = FALSE, sep = ",")
 ```
 ```{r anti.heat GO_MWU}
 # Run GO_MWU for Antibiotics.Heat vs. control for Biological Process (BP) GO terms
 commandArgs <- function(...) c("anti.heat.control.logP.txt", "BP")
-source("../R/GO_MWU/GO_MWU.R")
+source("./R/GO_MWU/GO_MWU.R")
 
 # Run GO_MWU for Antibiotics.Heat vs. control for Molecular Function GO terms
 commandArgs <- function(...) c("anti.heat.control.logP.txt", "MF")
-source("../R/GO_MWU/GO_MWU.R")
+source("./R/GO_MWU/GO_MWU.R")
 
 # Run GO_MWU for Antibiotics.Heat vs. control for Cellular Component (CC) GO terms
 commandArgs <- function(...) c("anti.heat.control.logP.txt", "CC")
-source("../R/GO_MWU/GO_MWU.R")
+source("./R/GO_MWU/GO_MWU.R")
 ```
 ```{r anti.heat.control_GO}
 anti.heat.control.GO <- as.list(
-  c(BP = "../R/GO_MWU/MWU_BP_anti.heat.control.logP.txt",
-    MF = "../R/GO_MWU/MWU_MF_anti.heat.control.logP.txt",
-    CC = "../R/GO_MWU/MWU_CC_anti.heat.control.logP.txt")
+  c(BP = "./R/GO_MWU/MWU_BP_anti.heat.control.logP.txt",
+    MF = "./R/GO_MWU/MWU_MF_anti.heat.control.logP.txt",
+    CC = "./R/GO_MWU/MWU_CC_anti.heat.control.logP.txt")
   ) %>% map(read.table, header = T) %>%
   bind_rows(.id = "ontology") %>%
   as_tibble() %>%
@@ -741,11 +763,11 @@ anti.heat.control.GO %>% filter(p.adj < 0.01 & delta.rank >= 0) %>% count(ontolo
 ```{r anti.heat GO_MWU plot}
 # Plot GO_MWU results for Antibiotics.Heat vs. control 
 commandArgs <- function(...) c("anti.heat.control.logP.txt", "BP", "GO_MWU.anti.heat.control_slim.pdf", 5e-2, 1e-2, 1e-3, 1.0)
-source("../R/GO_MWU/GO_MWU_plot.R")
+source("./R/GO_MWU/GO_MWU_plot.R")
 commandArgs <- function(...) c("anti.heat.control.logP.txt", "MF", "GO_MWU.anti.heat.control_slim.pdf", 5e-2, 1e-2, 1e-3, 1.0)
-source("../R/GO_MWU/GO_MWU_plot.R")
+source("./R/GO_MWU/GO_MWU_plot.R")
 commandArgs <- function(...) c("anti.heat.control.logP.txt", "CC", "GO_MWU.anti.heat.control_slim.pdf", 5e-2, 1e-2, 1e-3, 1.0)
-source("../R/GO_MWU/GO_MWU_plot.R")
+source("./R/GO_MWU/GO_MWU_plot.R")
 ```
 ```{r allGO}
 #Supplemental table with all GO results
@@ -757,7 +779,7 @@ allGO <- bind_rows(.id = "contrast",
   select(contrast, ontology, delta.rank, name, p.adj) %>%
   arrange(contrast, ontology, sign(delta.rank), p.adj)
 
-write_csv(allGO, path = "../outputs/DESeq-results/GO_MWU/allGO.csv")
+write_csv(allGO, path = "./outputs/DESeq-results/GO_MWU/allGO.csv")
 ```
 
 ## DESeq EuKaryotic Orthologous Groups (KOG) enrichment analysis
