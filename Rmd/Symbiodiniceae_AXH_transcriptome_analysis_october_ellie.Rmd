@@ -9,7 +9,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
-knitr::opts_knit$set(root.dir = "~/Documents/Research/EAPSI_Symbiodinaceae/")#Rmd/
+knitr::opts_knit$set(root.dir = "~/Documents/projects/EAPSI_Symbiodinaceae/")#Rmd/
 # knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Symbiodinaceae/")
 options(stringsAsFactors = FALSE)
 ```
@@ -135,17 +135,14 @@ theme_set(theme_mec())
 
 ## (DONE) Import sample metadata, counts data, and gene annotation
 ```{r, echo=TRUE}
-<<<<<<< HEAD
 stable_samples <- read.table("./data/EAPSI_samples_AxH.txt", header = TRUE)
 #stable_samples$treatment <- as.factor(stable_samples$treatment)
 #stable_samples$genotype <- as.factor(stable_samples$genotype)
 countdata <- read.csv("./outputs/SymC1_counts/AxH_SymC1.csv", comment.char="#")
-=======
 samples <- read.table("./data/EAPSI_samples_AxH_meta.txt", header = TRUE)
 samples$SampleID <- gsub('-','.', samples$SampleID)
 # Import and tidy counts data
 countdata <- read.delim("./outputs/SymC1_counts/AxH_SymC1.counts", comment.char="#")
->>>>>>> 99d76c7a5eebc2d038fe8a608224fc431c1dd5cd
 ## Tidy counts data
 #Set Gene ID's as row names
 row.names(countdata) <- countdata$Geneid
@@ -676,14 +673,14 @@ heat.control.GO$ontology
 ```{r heat GO_MWU plot}
 # Plot GO_MWU results for Heat vs. control 
 commandArgs <- function(...) c("heat.control.logP.txt", "BP", "GO_MWU.heat.control.pdf", 1e-6, 1e-8, 1e-10, 1.5)
-source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
-# source("./R/GO_MWU/GO_MWU_plot.R")
+#source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
+source("./R/GO_MWU/GO_MWU_plot.R")
 commandArgs <- function(...) c("heat.control.logP.txt", "MF", "GO_MWU.heat.control_slim.pdf", 0.05, 0.01, 1e-3, 1)
-#source("./R/GO_MWU/GO_MWU_plot.R")
-source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
+source("./R/GO_MWU/GO_MWU_plot.R")
+#source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
 commandArgs <- function(...) c("heat.control.logP.txt", "CC", "GO_MWU.heat.control_slim.pdf", 0.05, 0.01, 1e-3, 1)
-#source("./R/GO_MWU/GO_MWU_plot.R")
-source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
+source("./R/GO_MWU/GO_MWU_plot.R")
+#source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
 ```
 ### Antibiotics vs. control 
 ```{r anti signed logP}
