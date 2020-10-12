@@ -322,7 +322,7 @@ varpct <- vptdf %>% pivot_longer(cols = -gene, names_to = "source", values_to = 
 varpct
 ```
 
-## (DONE) Differential gene expression analysis (DESeq2)
+## Differential gene expression analysis (DESeq2)
 ```{r genotypic DESeq}
 #First, genotype-specific treatment models
 design(dds) <- formula(~ Batch + Colony.Treatment)
@@ -514,7 +514,7 @@ ggsave(plot = treatment_euler, filename = "./outputs/DESeq-results/figures/Euler
 ```
 
 
-## (DONE) DESeq results visualizations
+## DESeq results visualizations
 ### Volcano plots
 
 For each of these plot styles, create data handling and plotting functions to process essential inputs into the plot
