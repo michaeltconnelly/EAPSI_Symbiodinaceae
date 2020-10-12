@@ -1,0 +1,47 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
+# knitr::opts_knit$set(root.dir = "~/Documents/Research/EAPSI_Symbiodinaceae/data/cladocopium_annotations/")
+knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Symbiodinaceae/data/cladocopium_annotations/")
+```
+```{r}
+library("tidyverse")
+library("readxl")
+```
+```{r}
+excel_annotation <- read_excel("SymbC1.Gene_Models.Annotation.xlsx")
+clado_info <- read.csv("SymbC1.Gene_Models.Annotation.csv", header = T) %>%
+  rename(Gene.model = "ID") %>% 
+  arrange(ID)
+```
+```{r}
+emapper <- read.delim(file = "cladocopium_genome_protein.fasta.emapper.annotations", header = F)
+emapper <- emapper %>% 
+  select(V1, V6, V7, V9)
+emapper <- emapper[-(1:4),]
+colnames(emapper) <- c("ID", "Gene_Name", "GO_Terms_EM", "KO_Terms_EM")
+```
+```{r}
+kog <- read.delim(file = "cladocopium_gene2kogClass.tab", header = F, col.names = c("ID", "KOG_Class"))
+koga <- read.delim(file = "cladocopium_gene2kogClass1.tab", header = F, col.names = c("ID", "KOG_Class_A"))
+kog <- full_join(kog, koga, by = "ID")
+```
+Concatenate gene IDs, gene names, GO terms, KO terms, and KOG classes
+```{r}
+gene_annotation <- full_join(clado_info, emapper, by = "ID")
+gene_annotation <- full_join(gene_annotation, kog, by = "ID")
+```
+```{r}
+colnames(gene_annotation) <-  c("ID", "UniProt_BestHit", "Gene_Info", "E-value", "GO_Terms_C1", "KO_Terms_C1", "Pfam_Domains", "Gene_Name", "GO_Terms_EM", "KO_Terms_EM", "KOG_Class", "KOG_Class_A")
+
+gene_annotation <- gene_annotation %>%
+  select("ID", "Gene_Name", "UniProt_BestHit", "Gene_Info", "E-value", "GO_Terms_C1", "GO_Terms_EM", "KO_Terms_C1", "KO_Terms_EM", "Pfam_Domains",  "KOG_Class", "KOG_Class_A")
+is.na(gene_annotation) <- gene_annotation == ''
+```
+```{r}
+write_tsv(gene_annotation, path = "../cladocopium_genome_annotations.tsv")
+```
+

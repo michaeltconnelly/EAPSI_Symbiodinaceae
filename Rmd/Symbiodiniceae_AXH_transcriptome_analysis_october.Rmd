@@ -9,11 +9,11 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
-# knitr::opts_knit$set(root.dir = "~/Documents/Research/EAPSI_Symbiodinaceae/")#Rmd/
+# knitr::opts_knit$set(root.dir = "~/Documents/Research/EAPSI_Symbiodinaceae/")
 knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Symbiodinaceae/")
 options(stringsAsFactors = FALSE)
 ```
-## Setup packages and working directories (DONE)
+## Setup packages and working directories
 Include all packages needed for the entire transcriptome analysis and downstream visualizations
 ```{r packages, message=FALSE, include=FALSE}
 library("tidyverse")
@@ -133,7 +133,7 @@ theme_set(theme_mec())
 #image widths: 80 mm (one column), 112 mm (two-thirds page), 169 mm (two columns)
 ```
 
-## (DONE) Import sample metadata, counts data, and gene annotation
+## Import sample metadata, counts data, and gene annotation
 ```{r, echo=TRUE}
 samples <- read.table("./data/EAPSI_samples_AxH_meta.txt", header = TRUE)
 samples$SampleID <- gsub('-','.', samples$SampleID)
@@ -153,26 +153,15 @@ countdata <- countdata[ ,7:ncol(countdata)]
 # Sort countdata by Cladocopium goreaui gene ID
 countdata.sorted <- as.data.frame(countdata[order(rownames(countdata)),])
 ```
-
 ```{r gene data}
-# Need to redo genome annotation to incorporate GO and KOG annotations from egg-NOG-mapper
-#gene_annotation <- read.delim(file = "./data/genome_annotations.tab", header = T) %>% arrange(ID)
-
-#gene_annotation <- read.csv("~/Desktop/SymbC1.Gene_Models.Annotation.csv")
-gene_annotation <- read.csv("./data/SymbC1.Gene_Models.Annotation.csv", header = T) %>%
-  rename(Gene.model = "ID") %>% 
-  arrange(ID)
-# 
-rownames(gene_annotation) <- gene_annotation$Gene.model
-
+gene_annotation <- read.delim("./data/cladocopium_genome_annotations.tsv", header = T) %>% arrange(ID)
+rownames(gene_annotation) <- gene_annotation$ID
 # Check gene feature annotation and countdata rowname order coherence
-all(rownames(countdata.sorted) == gene_annotation$Gene.model)
+all(rownames(countdata.sorted) == gene_annotation$ID)
 all(rownames(countdata.sorted) == rownames(gene_annotation))
-
 # Obtain KOG annotations for Cladocopium goreaui genome
-# gene2kog <- gene_annotation %>% select(Gene.model, KOG_Class) %>% filter(KOG_Class != "")
+gene2kog <- gene_annotation %>% select(ID, KOG_Class) %>% filter(KOG_Class != "")
 ```
-
 ```{r coldata}
 # Get sample data into tibble
 coldata <- samples %>%
