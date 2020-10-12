@@ -9,11 +9,11 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, cache = TRUE)
-# knitr::opts_knit$set(root.dir = "~/Documents/Research/EAPSI_Symbiodinaceae/")
-knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Symbiodinaceae/")
+knitr::opts_knit$set(root.dir = "~/Documents/projects/EAPSI_Symbiodinaceae/")#Rmd/
+# knitr::opts_knit$set(root.dir = "~/computing/projects/EAPSI_Symbiodinaceae/")
 options(stringsAsFactors = FALSE)
 ```
-## Setup packages and working directories
+## Setup packages and working directories (DONE)
 Include all packages needed for the entire transcriptome analysis and downstream visualizations
 ```{r packages, message=FALSE, include=FALSE}
 library("tidyverse")
@@ -133,8 +133,12 @@ theme_set(theme_mec())
 #image widths: 80 mm (one column), 112 mm (two-thirds page), 169 mm (two columns)
 ```
 
-## Import sample metadata, counts data, and gene annotation
+## (DONE) Import sample metadata, counts data, and gene annotation
 ```{r, echo=TRUE}
+stable_samples <- read.table("./data/EAPSI_samples_AxH.txt", header = TRUE)
+#stable_samples$treatment <- as.factor(stable_samples$treatment)
+#stable_samples$genotype <- as.factor(stable_samples$genotype)
+countdata <- read.csv("./outputs/SymC1_counts/AxH_SymC1.csv", comment.char="#")
 samples <- read.table("./data/EAPSI_samples_AxH_meta.txt", header = TRUE)
 samples$SampleID <- gsub('-','.', samples$SampleID)
 # Import and tidy counts data
@@ -153,15 +157,26 @@ countdata <- countdata[ ,7:ncol(countdata)]
 # Sort countdata by Cladocopium goreaui gene ID
 countdata.sorted <- as.data.frame(countdata[order(rownames(countdata)),])
 ```
+
 ```{r gene data}
-gene_annotation <- read.delim("./data/cladocopium_genome_annotations.tsv", header = T) %>% arrange(ID)
-rownames(gene_annotation) <- gene_annotation$ID
+# Need to redo genome annotation to incorporate GO and KOG annotations from egg-NOG-mapper
+#gene_annotation <- read.delim(file = "./data/genome_annotations.tab", header = T) %>% arrange(ID)
+
+#gene_annotation <- read.csv("~/Desktop/SymbC1.Gene_Models.Annotation.csv")
+gene_annotation <- read.csv("./data/SymbC1.Gene_Models.Annotation.csv", header = T) %>%
+  rename(Gene.model = "ID") %>% 
+  arrange(ID)
+# 
+rownames(gene_annotation) <- gene_annotation$Gene.model
+
 # Check gene feature annotation and countdata rowname order coherence
-all(rownames(countdata.sorted) == gene_annotation$ID)
+all(rownames(countdata.sorted) == gene_annotation$Gene.model)
 all(rownames(countdata.sorted) == rownames(gene_annotation))
+
 # Obtain KOG annotations for Cladocopium goreaui genome
-gene2kog <- gene_annotation %>% select(ID, KOG_Class) %>% filter(KOG_Class != "")
+# gene2kog <- gene_annotation %>% select(Gene.model, KOG_Class) %>% filter(KOG_Class != "")
 ```
+
 ```{r coldata}
 # Get sample data into tibble
 coldata <- samples %>%
@@ -221,6 +236,7 @@ vsd <- vst(dds, blind = TRUE)
 ```
 ```{r}
 ggPCA(vsd, samples, condcolors_AxH, pclab = c(1,2))
+
 ```
 
 ### Principal Coordinate Analysis (PCoA)
@@ -657,14 +673,14 @@ heat.control.GO$ontology
 ```{r heat GO_MWU plot}
 # Plot GO_MWU results for Heat vs. control 
 commandArgs <- function(...) c("heat.control.logP.txt", "BP", "GO_MWU.heat.control.pdf", 1e-6, 1e-8, 1e-10, 1.5)
-source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
-# source("./R/GO_MWU/GO_MWU_plot.R")
+#source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
+source("./R/GO_MWU/GO_MWU_plot.R")
 commandArgs <- function(...) c("heat.control.logP.txt", "MF", "GO_MWU.heat.control_slim.pdf", 0.05, 0.01, 1e-3, 1)
-#source("./R/GO_MWU/GO_MWU_plot.R")
-source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
+source("./R/GO_MWU/GO_MWU_plot.R")
+#source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
 commandArgs <- function(...) c("heat.control.logP.txt", "CC", "GO_MWU.heat.control_slim.pdf", 0.05, 0.01, 1e-3, 1)
-#source("./R/GO_MWU/GO_MWU_plot.R")
-source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
+source("./R/GO_MWU/GO_MWU_plot.R")
+#source(knitr::purl("./R/GO_MWU/GO_MWU.R", quiet=TRUE))
 ```
 ### Antibiotics vs. control 
 ```{r anti signed logP}
