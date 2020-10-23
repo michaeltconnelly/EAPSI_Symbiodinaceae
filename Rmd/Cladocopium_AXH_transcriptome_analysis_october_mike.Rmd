@@ -95,40 +95,6 @@ geneexpcolors2 <- colorRampPalette(rev(c("red", "yellow", "grey10", "cyan", "blu
 ```
 ```{r theme}
 ### Create ggplot2 theme for Molecular Ecology submission
-theme_mec <- function(base_size = 10, base_family = "Arial") {
-(theme_foundation(base_size=base_size, base_family=base_family)
- + theme(
-   plot.background = element_rect(colour = NA),
-   panel.background = element_blank(),
-   panel.grid.major = element_blank(), 
-   panel.grid.minor = element_blank(), 
-   panel.border = element_rect(color = "black", fill = NA),
-   plot.title = element_text(face = "plain", size = rel(1), hjust = 0),
-   plot.subtitle = element_text(face = "plain", size = rel(0.8)),
-   axis.title = element_text(face = "plain",size = rel(1)),
-   axis.title.x = element_text(vjust = -2),
-   axis.title.y = element_text(angle = 90, vjust = 2),
-   text = element_text(),
-   axis.text = element_text(size = rel(0.8)), 
-   axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 0.5),
-   axis.text.y = element_text(), 
-   #axis.line = element_line(colour = "black"),
-   axis.ticks = element_line(),
-   legend.title = element_text(size = rel(1)),
-   legend.text = element_text(size = rel(0.8), margin = margin(t = 2, b = 2, unit = "mm")),
-   legend.key = element_rect(color = NA),
-   legend.background = element_rect(fill = NA, colour = NA),
-   legend.position = "right",
-   legend.direction = "vertical",
-   legend.spacing.x = unit(2, "mm"),
-   legend.spacing.y = unit(0, "mm"),
-   legend.key.size = unit(2, "mm"),
-   plot.margin = unit(c(2,2,2,2), "mm"),
-   strip.background = element_rect(color = "black", fill = "grey"),
-   strip.text = element_text(face = "plain")
-    ))
-}
-###
 theme_set(theme_mec())
 #image widths: 80 mm (one column), 112 mm (two-thirds page), 169 mm (two columns)
 ```
@@ -233,7 +199,7 @@ pcoa1 <- ggplot(mds_col, aes(fill = Treatment)) +
   geom_segment(mapping = aes(x = `1`, y = `2`, xend = c1, yend = c2),
                lwd = 0.25, col = "dark grey") +
   # colony centroid points
-  geom_point(size = 4, aes(x = c1, y = c2, color = Colony, shape = Colony), stroke = 2, fill = "black", show.legend = TRUE) +
+  geom_point(size = 3, aes(x = c1, y = c2, shape = Colony), stroke = 2, fill = "black", show.legend = TRUE) + #color = Colony,
   # sample points
   geom_point(size = 3, aes(x = `1`, y = `2`, fill = Treatment, shape = Colony), color = "black", stroke = 0.5, show.legend = FALSE) +
   scale_color_manual(values = colcolors) +
@@ -241,13 +207,16 @@ pcoa1 <- ggplot(mds_col, aes(fill = Treatment)) +
   scale_shape_manual(values = colshapes) +
   labs(x = xlab, y = ylab) +
   coord_fixed(1) +
-  guides(fill = guide_legend(override.aes = list(fill = condcolors_AxH, shape = 21, alpha = 1, stroke = 0.5))) +
+  # guides(fill = guide_legend(override.aes = list(fill = condcolors_AxH, shape = 21, alpha = 1, stroke = 0.5))) +
+  guides(color = guide_legend(override.aes = list(color = condcolors_AxH, alpha = 1, stroke = 1)),
+         fill = guide_legend(override.aes = list(fill = condcolors_AxH, shape = 21, alpha = 1, stroke = 0.5)),
+         shape = guide_legend(override.aes = list(shape = colshapes, alpha = 1, stroke = 0.5)))+
   theme(legend.spacing.y = unit(0, "cm")) 
-pcoa1title <- expression(paste("PCoA of overall ", italic("Pocillopora"), " spp. gene expression"))
-pcoa1 <- pcoa1 + ggtitle(pcoa1title, subtitle = "Plotted with colony centroids")
+# pcoa1title <- expression(paste("PCoA of overall ", italic("Pocillopora"), " spp. gene expression"))
+# pcoa1 <- pcoa1 + ggtitle(pcoa1title, subtitle = "Plotted with colony centroids")
 pcoa1
-ggsave(pcoa1, filename = "./outputs/DESeq-results/figures/pcoa_colony.pdf", width = 80, height = 80, units = "mm", device = "pdf")
-ggsave(pcoa1, filename = "./manuscript_figures/Fig1_PCoA_Colony.pdf", width = 80, height = 80, units = "mm", device = "pdf")
+ggsave(pcoa1, filename = "./outputs/DESeq-results/figures/pcoa_colony.pdf", width = 112, height = 80, units = "mm", device = "pdf")
+# ggsave(pcoa1, filename = "./manuscript_figures/Fig1_PCoA_Colony.pdf", width = 80, height = 80, units = "mm", device = "pdf")
 ```
 ```{r treatment pcoa}
 # Calculate Treatment centroids for plotting
@@ -276,13 +245,13 @@ pcoa2 <- ggplot(mds_trmt, aes(fill = Treatment)) +
   labs(x = xlab, y = ylab) +
   coord_fixed(1) +
   guides(color = guide_legend(override.aes = list(color = condcolors_AxH, alpha = 1, stroke = 1)),
-         fill = guide_legend(override.aes = list(fill = condcolors_AxH, alpha = 1, stroke = 1)),
+         fill = guide_legend(override.aes = list(fill = condcolors_AxH, shape = 21, alpha = 1, stroke = 0.5)),
          shape = guide_legend(override.aes = list(shape = colshapes, alpha = 1, stroke = 0.5)))
 # pcoa2title <- expression(paste("PCoA of ", italic("Pocillopora"), " coral gene expression"))
 # pcoa2 <- pcoa2 + ggtitle(pcoa2title, subtitle = "Plotted with treatment centroids")
 pcoa2
 ggsave(pcoa2, filename = "./outputs/DESeq-results/figures/pcoa_treatment.pdf", width = 112, height = 80, units = "mm", device = "pdf")
-ggsave(pcoa2, filename = "./manuscript_figures/Fig1A_PCoA_Treatment.pdf", width = 112, height = 80, units = "mm", device = "pdf")
+# ggsave(pcoa2, filename = "./manuscript_figures/Fig1A_PCoA_Treatment.pdf", width = 112, height = 80, units = "mm", device = "pdf")
 ```
 
 ### Variance partition
@@ -372,7 +341,7 @@ DEtab <- DE %>%
   dplyr::select(Colony, num, den, `DEGs [up, down]`)
 
 DE_table <- DEtab %>% filter(den == "control") 
-# write_csv(DE_table, "./outputs/DESeq-results/tables/DE_table.csv")
+write_csv(DE_table, "./outputs/DESeq-results/tables/DE_table.csv")
 ```
 ```{r sig_tables}
 # Write significant DEG results tables to csv files
@@ -387,7 +356,6 @@ DE %>%
   mutate(file_out = paste0(num, "_", den, "_", Colony, "_", "all", ".csv"),
          file_out_path = file.path("./outputs/DESeq-results/tables/all/", file_out),
          data = walk2(df, file_out_path, write_csv))
-# Why are there only 14 differentially expressed genes between the heat and control samples? --> Missing samples...low counts...interaction effect? 
 ```
 ```{r DE_master_results_table}
 # Next, I want to bring together the overall and genotype model LFC and padj values for each treatment contrast into a single table.
@@ -400,14 +368,7 @@ DEres <- DE %>%
   pivot_wider(names_from = contrast, values_from = log2FoldChange:padj) %>% 
   left_join(gene_annotation, by = "ID")
 ```
-```{r experimental}
-DEres %>% 
-  filter(ID %in% dpvarc$ID[dpvarc$LD1 > 0.0005]) %>% 
-  filter(padj_Antibiotics_control < 0.05, padj_Heat_control < 0.1) %>% 
-  filter(log2FoldChange_Heat_control > 0, log2FoldChange_Antibiotics.Heat_control > 0) %>% View()
-  # select(-contains("Heat_control")) %>% 
-  ggplot(aes(x = log2FoldChange_Heat_control, y = log2FoldChange_Antibiotics.Heat_control)) + geom_point()
-```
+
 
 ### Assess similarity of responses across colonies
 ```{r DEgenes_colony_comparison}
@@ -417,6 +378,7 @@ shared_DEGs_colonies <- DE %>%
   group_by(num, den) %>%
   dplyr::count(ID, log2FoldChange > 0) %>%   # In how many colonies is same gene DE in same direction?
   summarise(`1 colony` = sum(n==1), `2 colonies` = sum(n==2), `3 colonies` = sum(n==3), `4 colonies` = sum(n==4))
+write_csv(shared_DEGs_colonies, path = "./outputs/DESeq-results/tables/shared_DEGs_colonies.csv")
 ```
 ### Assess similarity of responses across treatments
 ```{r DEgenes_treatment_comparison}
@@ -427,6 +389,7 @@ shared_DEGs_treatments <- DE %>%
   group_by(Colony) %>%
   dplyr::count(ID, log2FoldChange > 0) %>% #View()
   summarise(`1 treatment` = sum(n==1), `2 treatments` = sum(n==2), `3 treatments` = sum(n==3))
+write_csv(shared_DEGs_treatments, path = "./outputs/DESeq-results/tables/shared_DEGs_treatments.csv")
 ```
 
 ```{r}
@@ -479,7 +442,7 @@ OverVenn <- draw.triple.venn(area1 = length(ressig_anti),
 grid.draw(OverVenn)
 ```
 ```{r treatent_eulerr}
-axh_list <- c(279, 54, 6775, 8, 605, 590, 126)
+axh_list <- c(6, 771, 3436, 0, 4, 1154, 2)
 names(axh_list) <- c("H", "A", "X", "H&A", "H&X", "A&X", "H&A&X")
 fit <- euler(axh_list, shape = "ellipse")
 treatment_euler <- plot(fit,
@@ -492,7 +455,7 @@ treatment_euler <- plot(fit,
      adjust_labels = TRUE)
 treatment_euler
 ggsave(plot = treatment_euler, filename = "./outputs/DESeq-results/figures/Euler_AXH.pdf", width = 80, height = 80, units = "mm", device = "pdf")
-ggsave(plot = treatment_euler, filename = "./manuscript_figures/Fig1B_AXH_Euler.pdf", width = 70, height = 70, units = "mm", device = "pdf")
+# ggsave(plot = treatment_euler, filename = "./manuscript_figures/Fig1B_AXH_Euler.pdf", width = 70, height = 70, units = "mm", device = "pdf")
 ```
 
 #### Up Euler Diagram
@@ -546,7 +509,7 @@ OverVenn_up <- draw.triple.venn(area1 = length(ressig_anti_up),
 grid.draw(OverVenn_up)
 ```
 ```{r}
-axh_list_up <- c(82, 37, 3163, 0, 120, 336, 25)
+axh_list_up <- c(2, 442, 1771, 0, 1, 499, 2)
 names(axh_list_up) <- c("H", "A", "X", "H&A", "H&X", "A&X", "H&A&X")
 fit_up <- euler(axh_list_up, shape = "ellipse")
 treatment_euler_up <- plot(fit_up,
@@ -613,7 +576,7 @@ OverVenn_down <- draw.triple.venn(area1 = length(ressig_anti_down),
 grid.draw(OverVenn_down)
 ```
 ```{r}
-axh_list_down <- c(216, 21, 3624, 5, 474, 258, 96)
+axh_list_down <- c(4, 330, 1666, 0, 3, 654, 0)
 names(axh_list_down) <- c("H", "A", "X", "H&A", "H&X", "A&X", "H&A&X")
 fit_down <- euler(axh_list_down, shape = "ellipse")
 treatment_euler_down <- plot(fit_down,
@@ -936,8 +899,8 @@ KOG_treatments <- KOGheatmap(
   fontsize_row = 7,
   fontsize_col = 8)
 
-ggsave(filename = "./outputs/DESeq-results/KOGMWU/figures/KOG_treatment_heatmap.pdf", KOG_treatments, width = 80, height = 105, units = "mm")
-ggsave(filename = "./manuscript_figures/Fig1C_KOGheatmap.pdf", KOG_treatments, width = 112, height = 92, units = "mm")
+ggsave(filename = "./outputs/DESeq-results/KOGMWU/figures/KOG_treatment_heatmap.pdf", KOG_treatments, width = 112, height = 150, units = "mm")
+# ggsave(filename = "./manuscript_figures/Fig1C_KOGheatmap.pdf", KOG_treatments, width = 112, height = 92, units = "mm")
 ```
 
 ## Discriminant analysis of principal components (DAPC)
@@ -972,7 +935,7 @@ my.dapc <- function(n.pca) dapc(t(dat), colData(dds)$Treatment, n.pca = n.pca, n
 # Retaining 7 PC's gives highest a-score (44%) but only utilizes 75% of the cumulative variance. Retaining 11 PC's gives a high a-score and uses 83% of cumulative variance. Therefore, let's use 11 PC's for the DA. 
 
 dp1 <- dapc(t(dat), colData(dds)$Treatment,
-            n.pca = 11, n.da = 2)   # Retain 11 PCs and 2 discriminant functions
+            n.pca = 7, n.da = 2)   # Retain 7 PCs and 2 discriminant functions
 scatter(dp1, bg="white", scree.da=TRUE, scree.pca=TRUE, legend=TRUE) 
 # Axis one represents antibiotics treatment response, Axis two represents the heat stress response.
 
@@ -995,9 +958,9 @@ dp1
 summary(dp1)
 # use discriminant function eigenvalues to determine percent between-group variance explained by each function
 dp1$eig[1]/sum(dp1$eig)
-# 0.7100686
+# 0.7780919
 dp1$eig[2]/sum(dp1$eig)
-# 0.2739501
+# 0.2033532
 ```
 ### Create DAPC spider plot
 ```{r dapc_spider}
@@ -1045,7 +1008,7 @@ dapcplot <- plot_grid(xplot, NULL, dapc.fig, yplot,
                       rel_heights = c(1, 3),
                       greedy = FALSE)
 dapcplot
-ggsave(filename = "./manuscript_figures/Fig2_DAPC.pdf", plot = dapcplot, width = 120, height = 115, units = "mm", device = "pdf")
+ggsave(filename = "./outputs/DAPC-results/figures/DAPC.pdf", plot = dapcplot, width = 120, height = 115, units = "mm", device = "pdf")
 # The DAPC clearly shows two distinct axes of stress responses among the antibiotics, heat stress, and combined stressors. 
 # The first linear discriminant function (LD1) separates antibiotics-treated fragments from non-treated fragments in the control and heat stress treatments.
 # The second linear discriminant function (LD2) separates heat-stressed fragments from ambient temperature fragments in the control and antibiotics treatments.
@@ -1054,15 +1017,15 @@ ggsave(filename = "./manuscript_figures/Fig2_DAPC.pdf", plot = dapcplot, width =
 dpvarc <- as.data.frame(dp1$var.contr) %>%
   rownames_to_column("ID") %>% left_join(gene_annotation, by = "ID") %>%
   arrange(desc(LD1))
-write_csv(dpvarc, path = "./outputs/DAPC_loadings_table.csv")
+write_csv(dpvarc, path = "./outputs/DAPC-results/tables/DAPC_loadings_table.csv")
 # filter out unannotated genes, arrange by loadings
 dpvarc %>% 
   select(ID, LD1, LD2, Gene_Info) %>% 
   filter(., !grepl("unknown", Gene_Info)) %>% 
   arrange(desc(LD2)) %>% 
   head(20) %>% 
-  select(-LD1) %>% 
-  write_excel_csv(path = "./outputs/DAPC-results/tables/LD2_table2.csv")
+  select(-LD2) %>% 
+  write_excel_csv(path = "./outputs/DAPC-results/tables/LD1_table2.csv")
 ```
 ### Explore DAPC axis loadings
 ```{r dapc_loadingplot}
@@ -1088,7 +1051,7 @@ load_ld1_barplot <- HeatmapAnnotation("DAPC LD1 loading" = anno_barplot(dpvarc_l
 pdf("./outputs/DESeq-results/figures/DAPC_LD1_10genes_heatmap_clustered.pdf", height = 8.5, width = 11)
 heatmapLD1 <- Heatmap(mat_ld1,
         #row_order = rownames(mat_ld1),
-        col = col_fun_ge(mat_ld1),
+        # col = col_fun_ge(mat_ld1),
         top_annotation = sample_annotation,
         right_annotation = load_ld1_barplot,
         row_dend_width = unit(0.75, "in"),
@@ -1106,8 +1069,8 @@ heatmapLD1 <- Heatmap(mat_ld1,
 draw(heatmapLD1, heatmap_legend_side = "left", legend_title_gp = gpar(fontsize = 10, fontface = "plain"), padding = unit(c(0.5, -2.0, 0.5, 0.5), "in"))
 ```
 ```{r dapc_boxplots_ld1}
-pdf("./outputs/DESeq-results/figures/DAPC_LD1_loadings_10genes_boxplots.pdf", height = 3.5, width = 5)
-for (i in 1:10) {
+pdf("./outputs/DAPC-results/figures/DAPC_LD1_loadings_10genes_boxplots.pdf", height = 3.5, width = 5)
+for (i in 1:20) {
   genoboxplot(dpvarc_ld1$ID[i])
 }
 ```
@@ -1148,12 +1111,12 @@ for (i in 1:10) {
 }
 ```
 ```{r loadings_scatterplot}
-pdf("./outputs/DESeq-results/figures/DAPC_LD_loadings_scatterplot.pdf", height = 7, width = 7)
+pdf("./outputs/DAPC-results/figures/DAPC_LD_loadings_scatterplot.pdf", height = 7, width = 7)
 dpvarc %>% ggplot(., aes(x = LD1, y = LD2)) +
   geom_point() +
-  xlim(c(0,0.01)) +
-  ylim(c(0,0.01)) +
-  geom_text_repel(data = dpvarc_ld2[1:10, ], aes(label = (dpvarc_ld2[1:10, 5])), color = "black", size = 2.5, box.padding = unit(0.35, "lines")) + ggtitle("DAPC LD gene loadings scatterplot", subtitle = "Top 10 genes LD2 labelled")
+  xlim(c(0,0.0025)) +
+  ylim(c(0,0.0025)) +
+  geom_text_repel(data = dpvarc_ld2[1:10, ], aes(label = (dpvarc_ld2[1:10, 6])), color = "black", size = 2.5, box.padding = unit(0.35, "lines")) + ggtitle("DAPC LD gene loadings scatterplot", subtitle = "Top 10 genes LD2 labelled")
 ```
 ## Weighted gene co-expression network analysis (WGCNA)
 ```{r wgcna_setup_datExpr}
@@ -1180,8 +1143,8 @@ sft$powerEstimate
 adjacency <- adjacency(datExpr,
       # Network construction arguments:  correlation, adjacency function,  and topological overlap map options
                        corFnc = "bicor", # bimidweight correlation
-                       # power = sft$powerEstimate, # 10
-                       power = 10,
+                       power = sft$powerEstimate, # 10
+                       # power = 4,
                        type = "signed") # signed
 # 
 TOM <- TOMsimilarity(adjacency,
@@ -1234,7 +1197,7 @@ table(mergedColors)
 ```
 ```{r dendrogram_modules}
 pdf(file = "./outputs/WGCNA-results/dendrogram.pdf", width = 8, height = 6)
-pdf(file = "./manuscript_figures/FigS##_WGCNA_dendrogram.pdf", width = 8, height = 6)
+# pdf(file = "./manuscript_figures/FigS##_WGCNA_dendrogram.pdf", width = 8, height = 6)
 # Plot the dendrogram and the module colors underneath
 plotDendroAndColors(dendro = geneTree, 
                     colors = cbind(dynamicColors, mergedColors),
@@ -1291,8 +1254,8 @@ write_csv(module_annotation, path = fileName)
 hubs <- chooseTopHubInEachModule(datExpr,
                          mergedColors,
                          corFnc = "bicor", # bimidweight correlation
-                         # power=sft$powerEstimate, # 10
-                         power = 10,
+                         power=sft$powerEstimate, # 4
+                         # power = 4,
                          type = "signed")
 hub_genes <- gene_annotation[hubs, ]
 hub_genes$module <- names(hubs)
@@ -1358,7 +1321,7 @@ moduleTraitStars <- as.data.frame(moduleTraitPvalue) %>%
 ```{r taxa_relative_abundance_traits}
 # Combined analysis linking WGCNA modules and bacteria relative abundance
 # read in table with relative abundances of interesting bacteria taxa
-datTaxa_Family <- read_csv("./outputs/phyloseq-results/datTaxa_Family.csv")
+datTaxa_Family <- read_csv("./data/datTaxa_Family.csv") %>% column_to_rownames("SampleID")
 datTaxa_Family <- datTaxa_Family %>% dplyr::select(-Alteromonadaceae, -Endozoicomonadaceae)
 ```
 ```{r ME_correlations_taxa}
@@ -1580,7 +1543,7 @@ kog_heatmap_fisher <- Heatmap(t(modkogtable_fisher),
                        height = unit(4, "in"),
                        width = unit(4, "in")
                       ))
-draw(kog_heatmap, column_title = "Module KOG enrichment heatmap", 
+draw(kog_heatmap_fisher, column_title = "Module KOG enrichment heatmap", 
      show_annotation_legend = FALSE, heatmap_legend_side = "left"
      )
 ```
@@ -1769,7 +1732,7 @@ col_fun_ge <- function(mat) {
   colorRamp2(c(max(mat), max(mat)/2, mean(mat), min(mat)/2, min(mat)), c("red", "yellow", "grey10", "cyan", "blue"))
 }
 col_fun_cor <- colorRamp2(c(1, 0, -1), c("red", "white", "blue"))
-col_fun_KOGfisher <- colorRamp2(c(80, 0), c("red", "white"))
+col_fun_KOGfisher <- colorRamp2(c(15, 0), c("red", "white"))
 # ComplexHeatmap sample annotations
 sample_annotation <- HeatmapAnnotation(Colony = samples$Colony,
                                        Treatment = samples$Treatment,
@@ -1983,7 +1946,7 @@ me_kog_heatmap_fisher <- Heatmap(t(modkogtable_fisher),
                       row_split = NULL,
                       border = FALSE,
                       rect_gp = gpar(col = "black", lwd = 0.5),
-                      column_order = rownames(modkogtable),
+                      column_order = rownames(modkogtable_fisher),
                       column_names_rot = 60,
                       column_names_side = "bottom",
                       # column_names_centered = TRUE,
@@ -2036,8 +1999,8 @@ draw(combmap,
      heatmap_height = unit(14, "cm"))
 ```
 ```{r}
-# pdf("./outputs/WGCNA-results/figures/treatment_bacteria_heatmap.pdf", height = 6.5, width = 7)
-pdf("./manuscript_figures/Fig4A_ME_heatmap.pdf", height = 6.5, width = 7)
+pdf("./outputs/WGCNA-results/figures/treatment_bacteria_heatmap.pdf", height = 6.5, width = 7)
+# pdf("./manuscript_figures/Fig4A_ME_heatmap.pdf", height = 6.5, width = 7)
 combomap <- me_treatment_heatmap + me_bacteria_heatmap
 draw(combomap,
      # column_title = "WGCNA module correlations",
